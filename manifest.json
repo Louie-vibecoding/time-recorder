@@ -1,0 +1,10 @@
+{
+  "id": "time-recorder",
+  "name": "Time Recorder",
+  "version": "0.1.0",
+  "minAppVersion": "1.5.0",
+  "description": "Track time with two-click punch-in. Daily summary and timeline back-fill, all stored as Markdown.",
+  "author": "Louie",
+  "authorUrl": "",
+  "isDesktopOnly": false
+}
