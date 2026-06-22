@@ -1,15 +1,8 @@
 import { Segment, Category } from "./types";
 import { formatHHMM, parseHHMM } from "./time";
+import { inferCategoryId } from "./categoryInfer";
 
 const SEGMENT_REGEX = /^(\s*)([-*])\s+\[[ xX]\]\s+(\d{1,2}:\d{1,2})\s*-\s*(\d{1,2}:\d{1,2})\s*(.*)$/;
-
-// TEMPORARY — replaced in Task 8 with proper categoryInfer.ts
-function inferTemp(activity: string, categories: Category[]): string {
-  for (const c of categories) {
-    if (activity && activity.includes(c.name)) return c.id;
-  }
-  return "other";
-}
 
 export function parseDayContent(content: string, categories: Category[]): Segment[] {
   const lines = content.split("\n");
@@ -28,7 +21,7 @@ export function parseDayContent(content: string, categories: Category[]): Segmen
       start,
       end,
       activity,
-      categoryId: inferTemp(activity, categories),
+      categoryId: inferCategoryId(activity, categories),
       lineNumber: i,
     });
   }
