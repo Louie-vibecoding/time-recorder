@@ -63,14 +63,21 @@
 
 .tr-grid-footer {
   display: flex;
-  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--size-4-2);
   margin-top: var(--size-4-4);
   padding-top: var(--size-4-2);
   border-top: 1px solid var(--background-modifier-border);
 }
 
 .tr-grid-footer button {
+  flex: 1 1 auto;
+  min-height: 44px;
   padding: var(--size-4-2) var(--size-4-3);
+}
+
+.tr-clickable-notice {
+  cursor: pointer;
 }
 
 /* === Custom Activity Modal === */

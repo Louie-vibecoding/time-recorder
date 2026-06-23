@@ -5,6 +5,7 @@ import { UndoStack } from "./undoStack";
 import { punchIn } from "./punchIn";
 import { nowHHMM } from "./time";
 import { getTodayDateString } from "./date";
+import { showPunchSuccessNotice } from "./openTodayFile";
 
 export class CustomActivityModal extends Modal {
   private activity = "";
@@ -63,7 +64,7 @@ export class CustomActivityModal extends Modal {
         activity,
         now,
       }, this.settings.categories);
-      new Notice(`✅ ${activity} ${now} 起`);
+      showPunchSuccessNotice(this.app, this.recordsFile, activity, now);
       this.close();
       this.onPunched?.();
     } catch (err) {

@@ -5,6 +5,7 @@ import { UndoStack } from "./undoStack";
 import { punchIn, undoLast } from "./punchIn";
 import { nowHHMM, minutesDiff, formatDuration } from "./time";
 import { getTodayDateString } from "./date";
+import { openTodayFile, showPunchSuccessNotice } from "./openTodayFile";
 
 export class GridModal extends Modal {
   constructor(
@@ -52,6 +53,12 @@ export class GridModal extends Modal {
     });
     if (this.undoStack.size() === 0) undoBtn.setAttribute("disabled", "true");
 
+    const openTodayBtn = footer.createEl("button", { text: "📄 今日记录" });
+    openTodayBtn.addEventListener("click", async () => {
+      this.close();
+      await openTodayFile(this.app, this.recordsFile);
+    });
+
     const closeBtn = footer.createEl("button", { text: "关闭" });
     closeBtn.addEventListener("click", () => this.close());
   }
@@ -93,7 +100,7 @@ export class GridModal extends Modal {
         activity,
         now,
       }, this.settings.categories);
-      new Notice(`✅ ${activity} ${now} 起`);
+      showPunchSuccessNotice(this.app, this.recordsFile, activity, now);
       this.close();
       this.onPunched?.();
     } catch (err) {
