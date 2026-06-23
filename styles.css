@@ -72,3 +72,37 @@
 .tr-grid-footer button {
   padding: var(--size-4-2) var(--size-4-3);
 }
+
+/* === Custom Activity Modal === */
+.tr-custom-modal .modal-content {
+  padding: var(--size-4-4);
+}
+
+.tr-form-row {
+  margin-bottom: var(--size-4-3);
+}
+
+.tr-form-row label {
+  display: block;
+  margin-bottom: var(--size-2-2);
+  color: var(--text-muted);
+  font-size: var(--font-ui-small);
+}
+
+.tr-form-row input[type="text"] {
+  width: 100%;
+  padding: var(--size-4-2);
+  font-size: var(--font-ui-medium);
+}
+
+.tr-form-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--size-4-2);
+  margin-top: var(--size-4-4);
+}
+
+.tr-form-buttons button {
+  padding: var(--size-4-2) var(--size-4-4);
+  min-height: 44px;
+}

@@ -4,6 +4,7 @@ import { DEFAULT_SETTINGS } from "./src/settings";
 import { createObsidianVaultAdapter, RecordsFileManager } from "./src/recordsFile";
 import { UndoStack } from "./src/undoStack";
 import { GridModal } from "./src/GridModal";
+import { CustomActivityModal } from "./src/CustomActivityModal";
 
 export default class TimeRecorderPlugin extends Plugin {
   settings!: TimeRecorderSettings;
@@ -35,6 +36,17 @@ export default class TimeRecorderPlugin extends Plugin {
 
   openGridModal() {
     new GridModal(
+      this.app,
+      this.settings,
+      this.recordsFile,
+      this.undoStack,
+      () => { /* onPunched — used by summary view later */ },
+      () => this.openCustomActivityModal(),
+    ).open();
+  }
+
+  openCustomActivityModal() {
+    new CustomActivityModal(
       this.app,
       this.settings,
       this.recordsFile,
