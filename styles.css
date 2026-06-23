@@ -1,1 +1,74 @@
 /* Time Recorder plugin styles */
+
+/* === Grid Modal === */
+.tr-grid-modal .modal-content {
+  padding: var(--size-4-4);
+}
+
+.tr-grid-header {
+  text-align: center;
+  font-size: var(--font-ui-medium);
+  color: var(--text-muted);
+  margin-bottom: var(--size-4-3);
+  padding-bottom: var(--size-4-2);
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.tr-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--size-4-3);
+}
+
+@media (max-width: 360px) {
+  .tr-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.tr-cell {
+  background: var(--background-secondary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-m);
+  padding: var(--size-4-3);
+  text-align: center;
+  cursor: pointer;
+  min-height: 88px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  transition: background 0.1s, border-color 0.1s;
+}
+
+.tr-cell:hover {
+  background: var(--background-modifier-hover);
+  border-color: var(--interactive-accent);
+}
+
+.tr-cell:active {
+  background: var(--background-modifier-active-hover);
+}
+
+.tr-cell-emoji {
+  font-size: 2em;
+  line-height: 1;
+}
+
+.tr-cell-label {
+  font-size: var(--font-ui-small);
+  color: var(--text-normal);
+  margin-top: var(--size-2-2);
+}
+
+.tr-grid-footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--size-4-4);
+  padding-top: var(--size-4-2);
+  border-top: 1px solid var(--background-modifier-border);
+}
+
+.tr-grid-footer button {
+  padding: var(--size-4-2) var(--size-4-3);
+}
