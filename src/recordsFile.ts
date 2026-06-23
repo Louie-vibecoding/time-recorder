@@ -60,6 +60,10 @@ export class RecordsFileManager {
     await this.ensureFileExists(date);
     await this.vault.write(this.getDayFilePath(date), content);
   }
+
+  async writeRawByPath(filePath: string, content: string): Promise<void> {
+    await this.vault.write(filePath, content);
+  }
 }
 
 /** Adapter that wraps Obsidian's real Vault API. Used in main.ts. */
