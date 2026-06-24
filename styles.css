@@ -241,3 +241,17 @@
 .tr-segment-block:hover {
   background: var(--background-modifier-active-hover);
 }
+
+/* === Segment Editor Modal === */
+.tr-editor-modal .modal-content {
+  padding: var(--size-4-4);
+}
+
+.tr-editor-modal input[type="time"],
+.tr-editor-modal input[type="text"],
+.tr-editor-modal select {
+  width: 100%;
+  padding: var(--size-4-2);
+  min-height: 44px;
+  font-size: var(--font-ui-medium);
+}
