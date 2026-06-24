@@ -7,6 +7,7 @@ import { GridModal } from "./src/GridModal";
 import { CustomActivityModal } from "./src/CustomActivityModal";
 import { StatusIndicator } from "./src/statusBar";
 import { TodaySummaryView, VIEW_TYPE_TODAY_SUMMARY } from "./src/TodaySummaryView";
+import { TimelineView, VIEW_TYPE_TIMELINE } from "./src/TimelineView";
 
 export default class TimeRecorderPlugin extends Plugin {
   settings!: TimeRecorderSettings;
@@ -49,6 +50,11 @@ export default class TimeRecorderPlugin extends Plugin {
       (leaf) => new TodaySummaryView(leaf, this.settings, this.recordsFile),
     );
 
+    this.registerView(
+      VIEW_TYPE_TIMELINE,
+      (leaf) => new TimelineView(leaf, this.settings, this.recordsFile),
+    );
+
     // Single file-watch handler for both status + summary
     this.registerEvent(
       this.app.vault.on("modify", async (file) => {
@@ -62,10 +68,17 @@ export default class TimeRecorderPlugin extends Plugin {
       name: "Open today summary",
       callback: () => this.activateSummaryView(),
     });
+
+    this.addCommand({
+      id: "open-timeline",
+      name: "Open timeline back-fill",
+      callback: () => this.activateTimelineView(),
+    });
   }
 
   async onunload() {
     this.app.workspace.detachLeavesOfType(VIEW_TYPE_TODAY_SUMMARY);
+    this.app.workspace.detachLeavesOfType(VIEW_TYPE_TIMELINE);
   }
 
   async refreshAll(): Promise<void> {
@@ -73,6 +86,11 @@ export default class TimeRecorderPlugin extends Plugin {
     for (const leaf of this.app.workspace.getLeavesOfType(VIEW_TYPE_TODAY_SUMMARY)) {
       if (leaf.view instanceof TodaySummaryView) {
         await leaf.view.refresh();
+      }
+    }
+    for (const leaf of this.app.workspace.getLeavesOfType(VIEW_TYPE_TIMELINE)) {
+      if (leaf.view instanceof TimelineView) {
+        await leaf.view.render();
       }
     }
   }
@@ -88,6 +106,16 @@ export default class TimeRecorderPlugin extends Plugin {
     // Refresh
     const view = leaf.view as TodaySummaryView;
     await view.refresh();
+  }
+
+  async activateTimelineView() {
+    const { workspace } = this.app;
+    let leaf = workspace.getLeavesOfType(VIEW_TYPE_TIMELINE)[0];
+    if (!leaf) {
+      leaf = workspace.getLeaf(true);
+      await leaf.setViewState({ type: VIEW_TYPE_TIMELINE, active: true });
+    }
+    workspace.revealLeaf(leaf);
   }
 
   openGridModal() {
