@@ -1,10 +1,10 @@
 /**
  * One time segment from a daily record.
- * end="00:00" means "open" (still in progress).
+ * end="ing" means "open" (still in progress); legacy files may use "00:00".
  */
 export interface Segment {
   start: string;      // "08:30"
-  end: string;        // "10:00" or "00:00" (open)
+  end: string;        // "10:00" | "ing"(进行中) | "24:00"(真午夜) | 旧 "00:00"(进行中, 兼容)
   activity: string;   // "学习obsidian"
   categoryId: string; // inferred id (e.g., "study")
   lineNumber: number; // 0-indexed line in the source .md file

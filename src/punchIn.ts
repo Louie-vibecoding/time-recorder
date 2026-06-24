@@ -13,8 +13,8 @@ export interface PunchInArgs {
 /**
  * Punch-in core action:
  * 1. Read today's file content.
- * 2. Find the open segment (end='00:00') and close it with `now`.
- * 3. Append a new open segment "- [ ] now - 00:00 activity".
+ * 2. Find the open segment (isOpenEnd: 'ing' or legacy '00:00') and close it with `now`.
+ * 3. Append a new open segment "- [ ] now - ing activity".
  * 4. Save the before-state to undoStack.
  * 5. Write the new content.
  */
@@ -53,7 +53,7 @@ export async function punchIn(
   // Append the new open segment
   const newLine = formatSegmentLine({
     start: args.now,
-    end: "00:00",
+    end: "ing",
     activity: args.activity,
     categoryId: "",
     lineNumber: -1,

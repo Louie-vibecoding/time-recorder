@@ -3,7 +3,7 @@ import { Category, TimeRecorderSettings } from "./types";
 import { RecordsFileManager } from "./recordsFile";
 import { UndoStack } from "./undoStack";
 import { punchIn, undoLast } from "./punchIn";
-import { nowHHMM, minutesDiff, formatDuration } from "./time";
+import { nowHHMM, minutesDiff, formatDuration, isOpenEnd } from "./time";
 import { getTodayDateString } from "./date";
 import { openTodayFile, showPunchSuccessNotice } from "./openTodayFile";
 
@@ -67,7 +67,7 @@ export class GridModal extends Modal {
     const header = parent.createDiv({ cls: "tr-grid-header" });
     const today = getTodayDateString();
     const day = await this.recordsFile.readDayRecord(today);
-    const open = day.segments.find(s => s.end === "00:00");
+    const open = day.segments.find(s => isOpenEnd(s.end));
     if (open) {
       const cat = this.settings.categories.find(c => c.id === open.categoryId);
       const emoji = cat ? cat.emoji : "❓";

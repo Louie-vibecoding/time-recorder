@@ -48,11 +48,36 @@ describe("parseDayContent", () => {
     expect(segments[0].activity).toBe("学习");
   });
 
-  it("treats end='00:00' as open segment when activity present", () => {
-    const content = `- [ ] 16:05 - 00:00 学习\n`;
+  it("treats end='00:00' as open segment when activity present (legacy compat)", () => {
+    const content = `- [ ] 14:30 - 00:00 通勤\n`;
     const segments = parseDayContent(content, DEFAULT_CATEGORIES);
     expect(segments.length).toBe(1);
     expect(segments[0].end).toBe("00:00");
+  });
+
+  it("parses end='ing' as an in-progress segment", () => {
+    const content = `- [ ] 16:12 - ing 编写插件\n`;
+    const segments = parseDayContent(content, DEFAULT_CATEGORIES);
+    expect(segments.length).toBe(1);
+    expect(segments[0]).toMatchObject({
+      start: "16:12",
+      end: "ing",
+      activity: "编写插件",
+    });
+  });
+
+  it("does not mis-parse an 'ing'-prefixed end token as in-progress", () => {
+    const content = `- [ ] 16:12 - ingredients 购物\n`;
+    const segments = parseDayContent(content, DEFAULT_CATEGORIES);
+    // The end field is not a standalone "ing", so this line is not a valid segment.
+    expect(segments.length).toBe(0);
+  });
+
+  it("parses end='24:00' as a true-midnight segment", () => {
+    const content = `- [ ] 22:45 - 24:00 洗漱\n`;
+    const segments = parseDayContent(content, DEFAULT_CATEGORIES);
+    expect(segments.length).toBe(1);
+    expect(segments[0].end).toBe("24:00");
   });
 
   it("ignores lines inside blockquotes", () => {
@@ -97,6 +122,28 @@ describe("formatSegmentLine", () => {
       lineNumber: 0,
     };
     expect(formatSegmentLine(seg)).toBe("- [ ] 08:30 - 10:00 学习");
+  });
+
+  it("writes 'ing' verbatim for an in-progress segment", () => {
+    const seg: Segment = {
+      start: "16:12",
+      end: "ing",
+      activity: "编写插件",
+      categoryId: "other",
+      lineNumber: 0,
+    };
+    expect(formatSegmentLine(seg)).toBe("- [ ] 16:12 - ing 编写插件");
+  });
+
+  it("writes '24:00' verbatim for a true-midnight segment", () => {
+    const seg: Segment = {
+      start: "22:45",
+      end: "24:00",
+      activity: "洗漱",
+      categoryId: "other",
+      lineNumber: 0,
+    };
+    expect(formatSegmentLine(seg)).toBe("- [ ] 22:45 - 24:00 洗漱");
   });
 });
 

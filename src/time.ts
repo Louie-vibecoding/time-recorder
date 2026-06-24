@@ -1,5 +1,6 @@
 /** Parse "HH:MM" → total minutes since midnight. Returns NaN on invalid. */
 export function parseHHMM(s: string): number {
+  if (s === "24:00") return 24 * 60; // true midnight end, allowed as a special case
   const m = s.match(/^(\d{1,2}):(\d{1,2})$/);
   if (!m) return NaN;
   const h = parseInt(m[1], 10);
@@ -15,11 +16,14 @@ export function formatHHMM(totalMinutes: number): string {
   return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
 }
 
-/** Minutes from start to end. Treats end="00:00" as 24:00 (open segment of unknown end). */
+/**
+ * Minutes from start to end.
+ * end="24:00" counts as true midnight (1440). end="ing" (or any unparseable
+ * value) returns 0 — callers measure in-progress duration via minutesDiff(start, nowHHMM()).
+ */
 export function minutesDiff(start: string, end: string): number {
   const s = parseHHMM(start);
-  let e = parseHHMM(end);
-  if (end === "00:00") e = 24 * 60;
+  const e = parseHHMM(end);
   if (isNaN(s) || isNaN(e)) return 0;
   return e - s;
 }
@@ -38,7 +42,11 @@ export function nowHHMM(): string {
   return formatHHMM(d.getHours() * 60 + d.getMinutes());
 }
 
-/** Convention: end="00:00" means the segment is still open. */
+/**
+ * Convention: end="ing" means the segment is still open (in progress).
+ * Legacy files may use end="00:00" for an open segment — still recognized for
+ * backward compat (empty template rows are filtered earlier by the parser).
+ */
 export function isOpenEnd(end: string): boolean {
-  return end === "00:00";
+  return end === "ing" || end === "00:00";
 }

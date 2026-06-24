@@ -26,6 +26,10 @@ describe("parseHHMM", () => {
     expect(parseHHMM("12:60")).toBeNaN();
     expect(parseHHMM("")).toBeNaN();
   });
+
+  it("accepts 24:00 as true midnight (1440)", () => {
+    expect(parseHHMM("24:00")).toBe(1440);
+  });
 });
 
 describe("formatHHMM", () => {
@@ -44,8 +48,12 @@ describe("minutesDiff", () => {
     expect(minutesDiff("08:00", "08:00")).toBe(0);
   });
 
-  it("treats end='00:00' as 24:00 (full-day open segment)", () => {
-    expect(minutesDiff("22:00", "00:00")).toBe(120);
+  it("treats end='24:00' as true midnight in duration", () => {
+    expect(minutesDiff("22:45", "24:00")).toBe(75);
+  });
+
+  it("returns 0 for an in-progress (ing) end", () => {
+    expect(minutesDiff("16:12", "ing")).toBe(0);
   });
 });
 
@@ -67,12 +75,17 @@ describe("nowHHMM", () => {
 });
 
 describe("isOpenEnd", () => {
-  it("returns true for '00:00' string", () => {
+  it("returns true for 'ing' (in-progress marker)", () => {
+    expect(isOpenEnd("ing")).toBe(true);
+  });
+
+  it("returns true for legacy '00:00' string (backward compat)", () => {
     expect(isOpenEnd("00:00")).toBe(true);
   });
 
   it("returns false for any other time", () => {
     expect(isOpenEnd("08:30")).toBe(false);
+    expect(isOpenEnd("10:00")).toBe(false);
     expect(isOpenEnd("23:59")).toBe(false);
   });
 });

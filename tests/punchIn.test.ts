@@ -34,16 +34,31 @@ describe("punchIn", () => {
     undo = new UndoStack();
   });
 
-  it("appends a new open segment when no prior segments exist", async () => {
+  it("appends a new open segment (end='ing') when no prior segments exist", async () => {
     await punchIn(mgr, undo, {
       date: "2026-6-17",
       activity: "学习",
       now: "16:05",
     });
-    expect(await vault.read("tr/2026-6-17 时间记录.md")).toBe("- [ ] 16:05 - 00:00 学习\n");
+    expect(await vault.read("tr/2026-6-17 时间记录.md")).toBe("- [ ] 16:05 - ing 学习\n");
   });
 
-  it("closes the previous open segment and appends new", async () => {
+  it("closes the previous open (ing) segment and appends new", async () => {
+    vault.files.set(
+      "tr/2026-6-17 时间记录.md",
+      "- [ ] 14:30 - ing 通勤\n",
+    );
+    await punchIn(mgr, undo, {
+      date: "2026-6-17",
+      activity: "学习",
+      now: "16:05",
+    });
+    expect(await vault.read("tr/2026-6-17 时间记录.md")).toBe(
+      "- [ ] 14:30 - 16:05 通勤\n- [ ] 16:05 - ing 学习\n",
+    );
+  });
+
+  it("closes a legacy open '00:00' segment (backward compat) and appends ing", async () => {
     vault.files.set(
       "tr/2026-6-17 时间记录.md",
       "- [ ] 14:30 - 00:00 通勤\n",
@@ -54,7 +69,7 @@ describe("punchIn", () => {
       now: "16:05",
     });
     expect(await vault.read("tr/2026-6-17 时间记录.md")).toBe(
-      "- [ ] 14:30 - 16:05 通勤\n- [ ] 16:05 - 00:00 学习\n",
+      "- [ ] 14:30 - 16:05 通勤\n- [ ] 16:05 - ing 学习\n",
     );
   });
 
@@ -69,7 +84,7 @@ describe("punchIn", () => {
       now: "16:05",
     });
     expect(await vault.read("tr/2026-6-17 时间记录.md")).toBe(
-      "- [ ] 14:30 - 15:30 通勤\n- [ ] 16:05 - 00:00 学习\n",
+      "- [ ] 14:30 - 15:30 通勤\n- [ ] 16:05 - ing 学习\n",
     );
   });
 
@@ -94,7 +109,7 @@ describe("punchIn", () => {
       now: "16:05",
     });
     expect(await vault.read("tr/2026-6-17 时间记录.md")).toBe(
-      "# Day\n- [ ] 00:00 - 00:00 \n- [ ] 14:30 - 16:05 通勤\n- [ ] 16:05 - 00:00 学习\n",
+      "# Day\n- [ ] 00:00 - 00:00 \n- [ ] 14:30 - 16:05 通勤\n- [ ] 16:05 - ing 学习\n",
     );
   });
 });
@@ -139,7 +154,7 @@ describe("undoLast", () => {
       now: "16:05",
     });
     expect(await vault.read("tr/2026-6-17 时间记录.md")).toBe(
-      "- [ ] 16:05 - 00:00 学习\n",
+      "- [ ] 16:05 - ing 学习\n",
     );
     expect(await undoLast(mgr, undo)).toBe(true);
     expect(await vault.read("tr/2026-6-17 时间记录.md")).toBe("");
