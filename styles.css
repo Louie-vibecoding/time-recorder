@@ -113,3 +113,9 @@
   padding: var(--size-4-2) var(--size-4-4);
   min-height: 44px;
 }
+
+/* === Status Bar === */
+.tr-status {
+  padding: 0 var(--size-4-2);
+  cursor: default;
+}

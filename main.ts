@@ -5,11 +5,13 @@ import { createObsidianVaultAdapter, RecordsFileManager } from "./src/recordsFil
 import { UndoStack } from "./src/undoStack";
 import { GridModal } from "./src/GridModal";
 import { CustomActivityModal } from "./src/CustomActivityModal";
+import { StatusIndicator } from "./src/statusBar";
 
 export default class TimeRecorderPlugin extends Plugin {
   settings!: TimeRecorderSettings;
   recordsFile!: RecordsFileManager;
   undoStack!: UndoStack;
+  statusIndicator!: StatusIndicator;
 
   async onload() {
     await this.loadSettings();
@@ -18,11 +20,23 @@ export default class TimeRecorderPlugin extends Plugin {
       this.settings,
     );
     this.undoStack = new UndoStack();
+    this.statusIndicator = new StatusIndicator(this, this.settings, this.recordsFile);
 
     // Ribbon icon
-    this.addRibbonIcon("clock", "Time Recorder: Punch in", () => {
+    const ribbon = this.addRibbonIcon("clock", "Time Recorder: Punch in", () => {
       this.openGridModal();
     });
+    this.statusIndicator.attachRibbon(ribbon);
+
+    // Status bar
+    this.statusIndicator.attachStatusBar();
+
+    // Refresh indicator when records change
+    this.registerEvent(
+      this.app.vault.on("modify", async () => {
+        await this.statusIndicator.refresh();
+      }),
+    );
 
     // Command
     this.addCommand({
@@ -40,7 +54,7 @@ export default class TimeRecorderPlugin extends Plugin {
       this.settings,
       this.recordsFile,
       this.undoStack,
-      () => { /* onPunched — used by summary view later */ },
+      () => this.statusIndicator.refresh(),
       () => this.openCustomActivityModal(),
     ).open();
   }
