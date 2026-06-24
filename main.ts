@@ -52,7 +52,7 @@ export default class TimeRecorderPlugin extends Plugin {
 
     this.registerView(
       VIEW_TYPE_TIMELINE,
-      (leaf) => new TimelineView(leaf, this.settings, this.recordsFile),
+      (leaf) => new TimelineView(leaf, this.settings, this.recordsFile, () => this.refreshAll()),
     );
 
     // Single file-watch handler for both status + summary

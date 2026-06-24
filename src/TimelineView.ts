@@ -2,7 +2,8 @@ import { ItemView, WorkspaceLeaf } from "obsidian";
 import { TimeRecorderSettings, Segment } from "./types";
 import { RecordsFileManager } from "./recordsFile";
 import { getTodayDateString, addDays } from "./date";
-import { parseHHMM, nowHHMM, isOpenEnd } from "./time";
+import { parseHHMM, formatHHMM, nowHHMM, isOpenEnd } from "./time";
+import { SegmentEditorModal } from "./SegmentEditorModal";
 
 export const VIEW_TYPE_TIMELINE = "time-recorder-timeline";
 
@@ -17,6 +18,7 @@ export class TimelineView extends ItemView {
     leaf: WorkspaceLeaf,
     private settings: TimeRecorderSettings,
     private recordsFile: RecordsFileManager,
+    private onDataChanged?: () => void,
   ) {
     super(leaf);
   }
@@ -94,6 +96,50 @@ export class TimelineView extends ItemView {
     for (const seg of day.segments) {
       this.renderSegmentBlock(body, seg);
     }
+
+    // 点击空白区域 → 智能填空 → 打开编辑器（点已有色块不触发，块编辑是 Task 21）
+    body.addEventListener("click", (e: MouseEvent) => {
+      if ((e.target as HTMLElement).closest(".tr-segment-block")) return;
+      const rect = body.getBoundingClientRect();
+      const yPx = e.clientY - rect.top;
+      this.handleEmptySlotClick(yPx, day);
+    });
+  }
+
+  private handleEmptySlotClick(yPx: number, day: { segments: Segment[] }) {
+    const clickedMin = Math.floor((yPx / PIXELS_PER_HOUR) * 60);
+    const start = formatHHMM(Math.floor(clickedMin / 60) * 60); // 整点
+    const startMin = parseHHMM(start);
+
+    // 找第一个开始时间晚于 clickedMin 的已有段
+    const candidates = day.segments
+      .map((s) => parseHHMM(s.start))
+      .filter((m) => !isNaN(m) && m > clickedMin)
+      .sort((a, b) => a - b);
+
+    let endMin: number;
+    if (candidates.length > 0) {
+      endMin = candidates[0]; // 智能填空：停在下一段开始处
+    } else {
+      endMin = Math.min(startMin + 60, 24 * 60); // 默认 1 小时，封顶 24:00
+    }
+    // formatHHMM(1440) 会绕回 "00:00"（编辑器 end>start 校验会拒）。
+    // 到达全天末尾时用 "24:00"（数据层 verbatim 写、校验通过、时间轴渲染到底部）。
+    const end = endMin >= 24 * 60 ? "24:00" : formatHHMM(endMin);
+
+    const editor = new SegmentEditorModal(
+      this.app,
+      this.settings,
+      this.recordsFile,
+      this.currentDate,
+      { kind: "new", start, end },
+      () => {
+        // 保存后走 refreshAll（决策 #22），刷新状态栏+今日汇总+所有时间轴
+        if (this.onDataChanged) this.onDataChanged();
+        else void this.render();
+      },
+    );
+    editor.open();
   }
 
   private renderSegmentBlock(parent: HTMLElement, seg: Segment) {
