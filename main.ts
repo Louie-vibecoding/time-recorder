@@ -6,6 +6,7 @@ import { UndoStack } from "./src/undoStack";
 import { GridModal } from "./src/GridModal";
 import { CustomActivityModal } from "./src/CustomActivityModal";
 import { StatusIndicator } from "./src/statusBar";
+import { TodaySummaryView, VIEW_TYPE_TODAY_SUMMARY } from "./src/TodaySummaryView";
 
 export default class TimeRecorderPlugin extends Plugin {
   settings!: TimeRecorderSettings;
@@ -44,9 +45,35 @@ export default class TimeRecorderPlugin extends Plugin {
       name: "Punch in (open grid)",
       callback: () => this.openGridModal(),
     });
+
+    this.registerView(
+      VIEW_TYPE_TODAY_SUMMARY,
+      (leaf) => new TodaySummaryView(leaf, this.settings, this.recordsFile),
+    );
+
+    this.addCommand({
+      id: "open-today-summary",
+      name: "Open today summary",
+      callback: () => this.activateSummaryView(),
+    });
   }
 
-  async onunload() {}
+  async onunload() {
+    this.app.workspace.detachLeavesOfType(VIEW_TYPE_TODAY_SUMMARY);
+  }
+
+  async activateSummaryView() {
+    const { workspace } = this.app;
+    let leaf = workspace.getLeavesOfType(VIEW_TYPE_TODAY_SUMMARY)[0];
+    if (!leaf) {
+      leaf = workspace.getRightLeaf(false) ?? workspace.getLeaf(true);
+      await leaf.setViewState({ type: VIEW_TYPE_TODAY_SUMMARY, active: true });
+    }
+    workspace.revealLeaf(leaf);
+    // Refresh
+    const view = leaf.view as TodaySummaryView;
+    await view.refresh();
+  }
 
   openGridModal() {
     new GridModal(
