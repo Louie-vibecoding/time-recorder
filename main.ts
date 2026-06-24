@@ -29,6 +29,11 @@ export default class TimeRecorderPlugin extends Plugin {
     });
     this.statusIndicator.attachRibbon(ribbon);
 
+    // Ribbon icon for summary view (mobile entry independent of bottom toolbar)
+    this.addRibbonIcon("pie-chart", "Time Recorder: Today summary", () => {
+      this.activateSummaryView();
+    });
+
     // Status bar
     this.statusIndicator.attachStatusBar();
 
@@ -48,16 +53,7 @@ export default class TimeRecorderPlugin extends Plugin {
     this.registerEvent(
       this.app.vault.on("modify", async (file) => {
         if (!file.path.startsWith(this.settings.recordsFolder + "/")) return;
-
-        // Refresh status indicator
-        await this.statusIndicator.refresh();
-
-        // Refresh summary view
-        const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_TODAY_SUMMARY);
-        for (const leaf of leaves) {
-          const view = leaf.view as TodaySummaryView;
-          await view.refresh();
-        }
+        await this.refreshAll();
       }),
     );
 
@@ -70,6 +66,15 @@ export default class TimeRecorderPlugin extends Plugin {
 
   async onunload() {
     this.app.workspace.detachLeavesOfType(VIEW_TYPE_TODAY_SUMMARY);
+  }
+
+  async refreshAll(): Promise<void> {
+    await this.statusIndicator.refresh();
+    for (const leaf of this.app.workspace.getLeavesOfType(VIEW_TYPE_TODAY_SUMMARY)) {
+      if (leaf.view instanceof TodaySummaryView) {
+        await leaf.view.refresh();
+      }
+    }
   }
 
   async activateSummaryView() {
@@ -91,7 +96,7 @@ export default class TimeRecorderPlugin extends Plugin {
       this.settings,
       this.recordsFile,
       this.undoStack,
-      () => this.statusIndicator.refresh(),
+      () => this.refreshAll(),
       () => this.openCustomActivityModal(),
     ).open();
   }
@@ -102,6 +107,7 @@ export default class TimeRecorderPlugin extends Plugin {
       this.settings,
       this.recordsFile,
       this.undoStack,
+      () => this.refreshAll(),
     ).open();
   }
 
