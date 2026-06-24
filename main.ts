@@ -32,13 +32,6 @@ export default class TimeRecorderPlugin extends Plugin {
     // Status bar
     this.statusIndicator.attachStatusBar();
 
-    // Refresh indicator when records change
-    this.registerEvent(
-      this.app.vault.on("modify", async () => {
-        await this.statusIndicator.refresh();
-      }),
-    );
-
     // Command
     this.addCommand({
       id: "punch-in",
@@ -49,6 +42,23 @@ export default class TimeRecorderPlugin extends Plugin {
     this.registerView(
       VIEW_TYPE_TODAY_SUMMARY,
       (leaf) => new TodaySummaryView(leaf, this.settings, this.recordsFile),
+    );
+
+    // Single file-watch handler for both status + summary
+    this.registerEvent(
+      this.app.vault.on("modify", async (file) => {
+        if (!file.path.startsWith(this.settings.recordsFolder + "/")) return;
+
+        // Refresh status indicator
+        await this.statusIndicator.refresh();
+
+        // Refresh summary view
+        const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_TODAY_SUMMARY);
+        for (const leaf of leaves) {
+          const view = leaf.view as TodaySummaryView;
+          await view.refresh();
+        }
+      }),
     );
 
     this.addCommand({
