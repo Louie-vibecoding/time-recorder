@@ -131,6 +131,8 @@ export default class TimeRecorderPlugin extends Plugin {
       this.undoStack,
       () => this.refreshAll(),
       () => this.openCustomActivityModal(),
+      () => this.activateSummaryView(),
+      () => this.activateTimelineView(),
     ).open();
   }
 

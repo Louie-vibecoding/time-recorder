@@ -15,6 +15,8 @@ export class GridModal extends Modal {
     private undoStack: UndoStack,
     private onPunched?: () => void,
     private openCustomActivity?: () => void,
+    private openSummary?: () => void,
+    private openTimeline?: () => void,
   ) {
     super(app);
   }
@@ -43,7 +45,7 @@ export class GridModal extends Modal {
 
     // Footer
     const footer = contentEl.createDiv({ cls: "tr-grid-footer" });
-    const undoBtn = footer.createEl("button", { text: "↶ 撤销最近一次" });
+    const undoBtn = footer.createEl("button", { text: "↶ 撤销" });
     undoBtn.addEventListener("click", async () => {
       const ok = await undoLast(this.recordsFile, this.undoStack);
       if (ok) new Notice("已撤销 ✅");
@@ -53,13 +55,25 @@ export class GridModal extends Modal {
     });
     if (this.undoStack.size() === 0) undoBtn.setAttribute("disabled", "true");
 
-    const openTodayBtn = footer.createEl("button", { text: "📄 今日记录" });
+    const openTodayBtn = footer.createEl("button", { text: "📄 今日" });
     openTodayBtn.addEventListener("click", async () => {
       this.close();
       await openTodayFile(this.app, this.recordsFile);
     });
 
-    const closeBtn = footer.createEl("button", { text: "关闭" });
+    const openSummaryBtn = footer.createEl("button", { text: "📊 汇总" });
+    openSummaryBtn.addEventListener("click", () => {
+      this.close();
+      this.openSummary?.();
+    });
+
+    const openTimelineBtn = footer.createEl("button", { text: "📅 时间轴" });
+    openTimelineBtn.addEventListener("click", () => {
+      this.close();
+      this.openTimeline?.();
+    });
+
+    const closeBtn = footer.createEl("button", { text: "✕ 关闭" });
     closeBtn.addEventListener("click", () => this.close());
   }
 

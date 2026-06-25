@@ -72,6 +72,7 @@
 
 .tr-grid-footer button {
   flex: 1 1 auto;
+  min-width: 4.5em;
   min-height: 44px;
   padding: var(--size-4-2) var(--size-4-3);
 }
