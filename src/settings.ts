@@ -6,9 +6,12 @@ export const DEFAULT_CATEGORIES: Category[] = [
   { id: "meal",    name: "饮食",     emoji: "🍱" },
   { id: "hygiene", name: "个人卫生", emoji: "🚿" },
   { id: "commute", name: "通勤",     emoji: "🚗" },
-  { id: "yuke",    name: "陪伴雨珂", emoji: "👧" },
+  { id: "yuke",    name: "陪伴",     emoji: "👧" },
   { id: "social",  name: "社交",     emoji: "💬" },
   { id: "chores",  name: "家务",     emoji: "🧹" },
+  { id: "work",    name: "工作",     emoji: "💼" },
+  { id: "sport",   name: "运动",     emoji: "🏃" },
+  { id: "fun",     name: "娱乐",     emoji: "🎮" },
 ];
 
 export const OTHER_CATEGORY: Category = {

@@ -29,9 +29,10 @@ export class GridModal extends Modal {
     // Header: current activity
     await this.renderHeader(contentEl);
 
-    // 3x3 grid
+    // 分类网格（3 列自动换行）：显示全部分类 + 末尾「自定义…」格。
+    // 分类数不再硬限制为 8——加分类直接进 settings.categories，网格自动多排行。
     const grid = contentEl.createDiv({ cls: "tr-grid" });
-    const cats = this.settings.categories.slice(0, 8);
+    const cats = this.settings.categories;
 
     for (const cat of cats) {
       this.renderCell(grid, cat, cat.emoji, cat.name, () => this.handlePunch(cat.name));
