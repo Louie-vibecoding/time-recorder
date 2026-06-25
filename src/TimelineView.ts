@@ -167,5 +167,21 @@ export class TimelineView extends ItemView {
     block.setText(`${cat?.emoji ?? "❓"} ${seg.activity} (${seg.start}-${seg.end})`);
 
     block.dataset.lineNumber = String(seg.lineNumber);
+
+    block.addEventListener("click", (e: MouseEvent) => {
+      e.stopPropagation();
+      const editor = new SegmentEditorModal(
+        this.app,
+        this.settings,
+        this.recordsFile,
+        this.currentDate,
+        { kind: "edit", segment: seg },
+        () => {
+          if (this.onDataChanged) this.onDataChanged();
+          else void this.render();
+        },
+      );
+      editor.open();
+    });
   }
 }
