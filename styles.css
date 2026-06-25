@@ -236,6 +236,7 @@
   color: var(--text-normal);
   overflow: hidden;
   box-sizing: border-box;
+  cursor: pointer; /* 色块可点击打开编辑器（Task 21）；手机无指针，仅 PC 生效 */
 }
 
 .tr-segment-block:hover {
