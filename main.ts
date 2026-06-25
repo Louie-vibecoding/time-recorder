@@ -35,6 +35,11 @@ export default class TimeRecorderPlugin extends Plugin {
       this.activateSummaryView();
     });
 
+    // Ribbon icon for timeline back-fill (mobile entry independent of bottom toolbar)
+    this.addRibbonIcon("gantt-chart", "Time Recorder: Open timeline back-fill", () => {
+      this.activateTimelineView();
+    });
+
     // Status bar
     this.statusIndicator.attachStatusBar();
 
