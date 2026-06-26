@@ -257,3 +257,24 @@
   min-height: 44px;
   font-size: var(--font-ui-medium);
 }
+
+.tr-drag-handle {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 6px;
+  cursor: ns-resize;
+  background: transparent;
+}
+
+.tr-drag-handle:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.tr-drag-top {
+  top: 0;
+}
+
+.tr-drag-bottom {
+  bottom: 0;
+}

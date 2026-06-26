@@ -1,8 +1,9 @@
-import { ItemView, WorkspaceLeaf } from "obsidian";
+import { ItemView, WorkspaceLeaf, Platform, Notice } from "obsidian";
 import { TimeRecorderSettings, Segment } from "./types";
 import { RecordsFileManager } from "./recordsFile";
 import { getTodayDateString, addDays } from "./date";
 import { parseHHMM, formatHHMM, nowHHMM, isOpenEnd } from "./time";
+import { formatSegmentLine, replaceLine } from "./parser";
 import { SegmentEditorModal } from "./SegmentEditorModal";
 
 export const VIEW_TYPE_TIMELINE = "time-recorder-timeline";
@@ -183,5 +184,80 @@ export class TimelineView extends ItemView {
       );
       editor.open();
     });
+
+    // 桌面端：拖拽手柄改时长。进行中段（end 动态）不给手柄，仍走点击编辑。
+    if (!Platform.isMobile && !isOpenEnd(seg.end)) {
+      this.attachDragHandles(block, seg);
+    }
+  }
+
+  private attachDragHandles(block: HTMLElement, seg: Segment) {
+    const topHandle = block.createDiv({ cls: "tr-drag-handle tr-drag-top" });
+    const bottomHandle = block.createDiv({ cls: "tr-drag-handle tr-drag-bottom" });
+
+    const cat = this.settings.categories.find((c) => c.id === seg.categoryId);
+    const emoji = cat?.emoji ?? "❓";
+    const origStart = parseHHMM(seg.start);
+    const origEnd = parseHHMM(seg.end); // 非进行中段，含 "24:00"=1440，必有效
+
+    const onDrag = (which: "top" | "bottom") => (e: MouseEvent) => {
+      e.stopPropagation();
+      e.preventDefault();
+      const startY = e.clientY;
+
+      const compute = (clientY: number): { newStart: number; newEnd: number } => {
+        const deltaPx = clientY - startY;
+        const deltaMin = Math.round((deltaPx / PIXELS_PER_HOUR) * 60 / 5) * 5; // 吸附 5 分钟
+        if (which === "top") {
+          const newStart = Math.max(0, Math.min(origStart + deltaMin, origEnd - 5));
+          return { newStart, newEnd: origEnd };
+        } else {
+          const newEnd = Math.max(origStart + 5, Math.min(origEnd + deltaMin, 24 * 60));
+          return { newStart: origStart, newEnd };
+        }
+      };
+
+      const paint = (newStart: number, newEnd: number) => {
+        block.style.top = `${(newStart / 60) * PIXELS_PER_HOUR}px`;
+        block.style.height = `${((newEnd - newStart) / 60) * PIXELS_PER_HOUR}px`;
+        const endLabel = newEnd >= 24 * 60 ? "24:00" : formatHHMM(newEnd);
+        block.setText(`${emoji} ${seg.activity} (${formatHHMM(newStart)}-${endLabel})`);
+      };
+
+      const onMove = (ev: MouseEvent) => {
+        const { newStart, newEnd } = compute(ev.clientY);
+        paint(newStart, newEnd);
+      };
+
+      const onUp = async (ev: MouseEvent) => {
+        window.removeEventListener("mousemove", onMove);
+        window.removeEventListener("mouseup", onUp);
+        const { newStart, newEnd } = compute(ev.clientY);
+        if (newStart === origStart && newEnd === origEnd) return; // 没变化
+
+        const updated: Segment = {
+          ...seg,
+          start: formatHHMM(newStart),
+          end: newEnd >= 24 * 60 ? "24:00" : formatHHMM(newEnd),
+        };
+        try {
+          const content = await this.recordsFile.readDayContent(this.currentDate);
+          const after = replaceLine(content, seg.lineNumber, formatSegmentLine(updated));
+          await this.recordsFile.writeDayContent(this.currentDate, after);
+        } catch (err) {
+          console.error("Time Recorder: failed to save dragged segment", err);
+          new Notice(`保存失败：${(err as Error).message}`);
+          return; // 失败不刷新，避免 UI 抖回误导
+        }
+        if (this.onDataChanged) this.onDataChanged();
+        else void this.render();
+      };
+
+      window.addEventListener("mousemove", onMove);
+      window.addEventListener("mouseup", onUp);
+    };
+
+    topHandle.addEventListener("mousedown", onDrag("top"));
+    bottomHandle.addEventListener("mousedown", onDrag("bottom"));
   }
 }
