@@ -8,6 +8,7 @@ import { CustomActivityModal } from "./src/CustomActivityModal";
 import { StatusIndicator } from "./src/statusBar";
 import { TodaySummaryView, VIEW_TYPE_TODAY_SUMMARY } from "./src/TodaySummaryView";
 import { TimelineView, VIEW_TYPE_TIMELINE } from "./src/TimelineView";
+import { getTodayDateString } from "./src/date";
 
 export default class TimeRecorderPlugin extends Plugin {
   settings!: TimeRecorderSettings;
@@ -23,6 +24,15 @@ export default class TimeRecorderPlugin extends Plugin {
     );
     this.undoStack = new UndoStack();
     this.statusIndicator = new StatusIndicator(this, this.settings, this.recordsFile);
+
+    // 启动时确保今日文件存在，用户可直接打卡（onLayoutReady 避开启动瞬间 UI/IO 竞争）
+    this.app.workspace.onLayoutReady(async () => {
+      try {
+        await this.recordsFile.ensureFileExists(getTodayDateString());
+      } catch (err) {
+        console.warn("Time Recorder: could not ensure today's file:", err);
+      }
+    });
 
     // Ribbon icon
     const ribbon = this.addRibbonIcon("clock", "Time Recorder: Punch in", () => {
