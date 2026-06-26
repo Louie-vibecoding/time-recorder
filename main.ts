@@ -9,6 +9,7 @@ import { StatusIndicator } from "./src/statusBar";
 import { TodaySummaryView, VIEW_TYPE_TODAY_SUMMARY } from "./src/TodaySummaryView";
 import { TimelineView, VIEW_TYPE_TIMELINE } from "./src/TimelineView";
 import { getTodayDateString } from "./src/date";
+import { TimeRecorderSettingsTab } from "./src/SettingsTab";
 
 export default class TimeRecorderPlugin extends Plugin {
   settings!: TimeRecorderSettings;
@@ -52,6 +53,9 @@ export default class TimeRecorderPlugin extends Plugin {
 
     // Status bar
     this.statusIndicator.attachStatusBar();
+
+    // Settings tab (read-only)
+    this.addSettingTab(new TimeRecorderSettingsTab(this.app, this));
 
     // Command
     this.addCommand({
