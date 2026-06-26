@@ -278,3 +278,21 @@
 .tr-drag-bottom {
   bottom: 0;
 }
+
+/* ---- Settings tab (editable) ---- */
+.tr-settings-hint {
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  margin: 0.25em 0 0.75em;
+}
+.tr-category-row .tr-emoji-input {
+  width: 3em;
+  text-align: center;
+}
+.tr-category-row .tr-alias-input {
+  flex: 1;
+  min-width: 8em;
+}
+.tr-other-row {
+  opacity: 0.8;
+}

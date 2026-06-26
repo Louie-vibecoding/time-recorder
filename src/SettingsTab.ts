@@ -1,36 +1,190 @@
-import { App, PluginSettingTab, Setting } from "obsidian";
+import { App, Modal, Notice, PluginSettingTab, Setting } from "obsidian";
 import TimeRecorderPlugin from "../main";
+import { DEFAULT_CATEGORIES, DEFAULT_SETTINGS, OTHER_CATEGORY } from "./settings";
+import { Category } from "./types";
+import { generateCategoryId } from "./idgen";
+import { parseAliases, validateCategoryName } from "./settingsValidation";
 
 export class TimeRecorderSettingsTab extends PluginSettingTab {
   constructor(app: App, private plugin: TimeRecorderPlugin) {
     super(app, plugin);
   }
 
+  private async persist(): Promise<void> {
+    await this.plugin.saveSettings();
+    await this.plugin.refreshAll();
+  }
+
   display(): void {
     const { containerEl } = this;
     containerEl.empty();
-
     containerEl.createEl("h2", { text: "Time Recorder 设置 / Settings" });
 
+    // ---------- 路径区 ----------
     new Setting(containerEl)
       .setName("记录文件夹")
-      .setDesc(this.plugin.settings.recordsFolder || "(未设置)");
+      .setDesc("时间记录 .md 文件所在文件夹。改此项不会自动搬移已有记录文件（旧文件留原处）。")
+      .addText((text) =>
+        text
+          .setPlaceholder(DEFAULT_SETTINGS.recordsFolder)
+          .setValue(this.plugin.settings.recordsFolder)
+          .onChange(async (value) => {
+            this.plugin.settings.recordsFolder = value.trim() || DEFAULT_SETTINGS.recordsFolder;
+            await this.persist();
+          }),
+      );
 
     new Setting(containerEl)
       .setName("模板路径")
-      .setDesc(this.plugin.settings.templatePath || "(未设置)");
+      .setDesc("新建当天记录文件时套用的模板。")
+      .addText((text) =>
+        text
+          .setPlaceholder(DEFAULT_SETTINGS.templatePath)
+          .setValue(this.plugin.settings.templatePath)
+          .onChange(async (value) => {
+            this.plugin.settings.templatePath = value.trim() || DEFAULT_SETTINGS.templatePath;
+            await this.persist();
+          }),
+      );
 
-    containerEl.createEl("h3", { text: "分类" });
-
-    const note = containerEl.createEl("p", {
-      text:
-        "1.0 暂无分类编辑界面。要增删改分类，请编辑插件目录下 src/settings.ts 的 DEFAULT_CATEGORIES 后重新 build 并重载 Obsidian（不要改 data.json）。",
+    // ---------- 分类区 ----------
+    containerEl.createEl("h3", { text: "分类 / Categories" });
+    const hint = containerEl.createEl("p", {
+      text: "活动名自动按「名字 / 关键词」归类。关键词用逗号分隔。改名 / 换 emoji / 删类都不会改动历史记录。",
     });
-    note.style.color = "var(--text-muted)";
+    hint.addClass("tr-settings-hint");
 
-    const list = containerEl.createEl("ul");
-    for (const c of this.plugin.settings.categories) {
-      list.createEl("li", { text: `${c.emoji} ${c.name} (id: ${c.id})` });
-    }
+    this.plugin.settings.categories.forEach((cat, index) => {
+      this.renderCategoryRow(containerEl, cat, index);
+    });
+
+    // other 兜底类（固定、只读、不可删）
+    new Setting(containerEl)
+      .setName(`${OTHER_CATEGORY.emoji} ${OTHER_CATEGORY.name}`)
+      .setDesc("兜底分类：无法归类的活动都计入这里。固定存在、不可删除、不可配关键词。")
+      .settingEl.addClass("tr-other-row");
+
+    // ---------- 操作按钮 ----------
+    new Setting(containerEl)
+      .addButton((btn) =>
+        btn
+          .setButtonText("+ 新增分类")
+          .setCta()
+          .onClick(async () => {
+            const id = generateCategoryId("", this.plugin.settings.categories.map((c) => c.id));
+            this.plugin.settings.categories.push({ id, name: "", emoji: "", aliases: [] });
+            await this.persist();
+            this.display();
+          }),
+      )
+      .addButton((btn) =>
+        btn
+          .setButtonText("恢复默认分类")
+          .setWarning()
+          .onClick(() => {
+            new ConfirmModal(
+              this.app,
+              "确定用出厂默认分类覆盖当前所有分类？此操作无法撤销。",
+              async () => {
+                this.plugin.settings.categories = DEFAULT_CATEGORIES.map((c) => ({
+                  ...c,
+                  aliases: [...c.aliases],
+                }));
+                await this.persist();
+                this.display();
+              },
+            ).open();
+          }),
+      );
+  }
+
+  private renderCategoryRow(containerEl: HTMLElement, cat: Category, index: number): void {
+    const setting = new Setting(containerEl);
+    setting.settingEl.addClass("tr-category-row");
+
+    // emoji（窄框）
+    setting.addText((text) => {
+      text
+        .setPlaceholder("❓")
+        .setValue(cat.emoji)
+        .onChange(async (value) => {
+          this.plugin.settings.categories[index].emoji = value.trim();
+          await this.persist();
+        });
+      text.inputEl.addClass("tr-emoji-input");
+    });
+
+    // 名字（带校验）
+    setting.addText((text) =>
+      text
+        .setPlaceholder("分类名")
+        .setValue(cat.name)
+        .onChange(async (value) => {
+          const err = validateCategoryName(value, this.plugin.settings.categories, index);
+          if (err) {
+            new Notice(err);
+            return;
+          }
+          this.plugin.settings.categories[index].name = value.trim();
+          await this.persist();
+        }),
+    );
+
+    // 关键词（逗号分隔）
+    setting.addText((text) => {
+      text
+        .setPlaceholder("关键词，逗号分隔")
+        .setValue(cat.aliases.join(", "))
+        .onChange(async (value) => {
+          this.plugin.settings.categories[index].aliases = parseAliases(value);
+          await this.persist();
+        });
+      text.inputEl.addClass("tr-alias-input");
+    });
+
+    // 删除
+    setting.addExtraButton((btn) =>
+      btn
+        .setIcon("trash")
+        .setTooltip("删除此分类")
+        .onClick(async () => {
+          this.plugin.settings.categories.splice(index, 1);
+          await this.persist();
+          this.display();
+        }),
+    );
+  }
+}
+
+/** 跨端安全的二次确认弹窗（不用 window.confirm，Android webview 友好）。 */
+class ConfirmModal extends Modal {
+  constructor(
+    app: App,
+    private message: string,
+    private onConfirm: () => void | Promise<void>,
+  ) {
+    super(app);
+  }
+
+  onOpen(): void {
+    const { contentEl } = this;
+    contentEl.createEl("p", { text: this.message });
+    new Setting(contentEl)
+      .addButton((btn) =>
+        btn
+          .setButtonText("确定")
+          .setWarning()
+          .onClick(async () => {
+            this.close();
+            await this.onConfirm();
+          }),
+      )
+      .addButton((btn) =>
+        btn.setButtonText("取消").onClick(() => this.close()),
+      );
+  }
+
+  onClose(): void {
+    this.contentEl.empty();
   }
 }
