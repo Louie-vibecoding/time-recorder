@@ -22,6 +22,7 @@ export interface Category {
   id: string;         // "study"
   name: string;       // "学习"
   emoji: string;      // "📚"
+  aliases: string[];  // 关键词；活动名包含任一即命中本类（跟分类走，用户可编辑）
 }
 
 /** Plugin settings, persisted to data.json. */
