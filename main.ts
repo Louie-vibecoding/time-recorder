@@ -1,6 +1,6 @@
-import { Plugin } from "obsidian";
+import { Notice, Plugin } from "obsidian";
 import { TimeRecorderSettings } from "./src/types";
-import { DEFAULT_SETTINGS } from "./src/settings";
+import { migrateSettings } from "./src/settingsMigration";
 import { createObsidianVaultAdapter, RecordsFileManager } from "./src/recordsFile";
 import { UndoStack } from "./src/undoStack";
 import { GridModal } from "./src/GridModal";
@@ -161,7 +161,40 @@ export default class TimeRecorderPlugin extends Plugin {
   }
 
   async loadSettings() {
-    this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+    let loaded: unknown = null;
+    let loadFailed = false;
+    try {
+      loaded = await this.loadData();
+    } catch (e) {
+      // data.json 存在但 JSON 解析失败。
+      loadFailed = true;
+    }
+    const { settings, recovered } = migrateSettings(loaded);
+    this.settings = settings;
+    if (recovered || loadFailed) {
+      await this.backupCorruptSettings();
+      new Notice(
+        "⏱️ 时间记录仪：你的设置文件好像出了点小问题，已经先用默认设置顶上了。原来的设置我自动留了备份、没丢，需要的话能帮你找回。",
+        0, // 0 = 常驻直到点击关闭，确保用户看到
+      );
+    }
+  }
+
+  /** 把损坏的 data.json 复制成 data.json.bak（不删原数据）。尽力而为、永不阻塞加载。 */
+  private async backupCorruptSettings() {
+    try {
+      const dir = this.manifest.dir;
+      if (!dir) return;
+      const dataPath = `${dir}/data.json`;
+      const bakPath = `${dir}/data.json.bak`;
+      const adapter = this.app.vault.adapter;
+      if (await adapter.exists(dataPath)) {
+        const raw = await adapter.read(dataPath);
+        await adapter.write(bakPath, raw);
+      }
+    } catch (e) {
+      // 备份失败也不影响插件正常加载（默认设置已就位）。
+    }
   }
 
   async saveSettings() {
