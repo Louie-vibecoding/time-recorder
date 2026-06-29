@@ -49,4 +49,12 @@ describe("inferCategoryId", () => {
     expect(() => inferCategoryId("随便", legacy)).not.toThrow();
     expect(inferCategoryId("随便", legacy)).toBe("other");
   });
+
+  it("tolerates a category missing the name field (dirty data.json)", () => {
+    const dirty = [{ id: "x", emoji: "📦", aliases: ["关键词"] } as unknown as Category];
+    expect(() => inferCategoryId("随便", dirty)).not.toThrow();
+    // 名字缺失的分类在精确/子串匹配阶段被跳过，但其 aliases 仍可命中
+    expect(inferCategoryId("含关键词", dirty)).toBe("x");
+    expect(inferCategoryId("无关", dirty)).toBe("other");
+  });
 });

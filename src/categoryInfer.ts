@@ -15,7 +15,7 @@ export function inferCategoryId(activity: string, categories: Category[]): strin
 
   // 1. Exact match by category name
   for (const c of categories) {
-    if (a === c.name.toLowerCase()) return c.id;
+    if (c.name && a === c.name.toLowerCase()) return c.id;
   }
 
   // 2. Substring match — activity contains category name

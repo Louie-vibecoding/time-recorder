@@ -54,7 +54,7 @@ export default class TimeRecorderPlugin extends Plugin {
     // Status bar
     this.statusIndicator.attachStatusBar();
 
-    // Settings tab (read-only)
+    // Settings tab (editable categories / paths)
     this.addSettingTab(new TimeRecorderSettingsTab(this.app, this));
 
     // Command
@@ -95,7 +95,7 @@ export default class TimeRecorderPlugin extends Plugin {
     });
   }
 
-  async onunload() {
+  onunload() {
     this.app.workspace.detachLeavesOfType(VIEW_TYPE_TODAY_SUMMARY);
     this.app.workspace.detachLeavesOfType(VIEW_TYPE_TIMELINE);
   }
