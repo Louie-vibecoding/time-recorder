@@ -5,6 +5,7 @@ import { getTodayDateString, addDays } from "./date";
 import { parseHHMM, formatHHMM, nowHHMM, isOpenEnd } from "./time";
 import { formatSegmentLine, replaceLine } from "./parser";
 import { SegmentEditorModal } from "./SegmentEditorModal";
+import { segmentColor } from "./segmentColor";
 
 export const VIEW_TYPE_TIMELINE = "time-recorder-timeline";
 
@@ -168,6 +169,13 @@ export class TimelineView extends ItemView {
     block.setText(`${cat?.emoji ?? "❓"} ${seg.activity} (${seg.start}-${seg.end})`);
 
     block.dataset.lineNumber = String(seg.lineNumber);
+
+    const color = segmentColor(seg.categoryId, this.settings.categories);
+    if (color) {
+      block.style.setProperty("--tr-cat-bg", color.bg);
+      block.style.setProperty("--tr-cat-border", color.border);
+      block.style.setProperty("--tr-cat-accent", color.accent);
+    }
 
     block.addEventListener("click", (e: MouseEvent) => {
       e.stopPropagation();

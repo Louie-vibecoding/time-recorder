@@ -231,8 +231,9 @@
   position: absolute;
   left: 48px;
   right: var(--size-4-2);
-  background: var(--background-modifier-hover);
-  border-left: 3px solid var(--interactive-accent);
+  background: var(--tr-cat-bg, var(--background-modifier-hover));
+  border: 1px solid var(--tr-cat-border, var(--background-modifier-border));
+  border-left: 3px solid var(--tr-cat-accent, var(--interactive-accent));
   border-radius: var(--radius-s);
   padding: var(--size-2-2) var(--size-4-2);
   font-size: var(--font-ui-small);
