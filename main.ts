@@ -1,4 +1,4 @@
-import { Notice, Plugin } from "obsidian";
+import { Notice, Plugin, WorkspaceLeaf } from "obsidian";
 import { TimeRecorderSettings } from "./src/types";
 import { migrateSettings } from "./src/settingsMigration";
 import { createObsidianVaultAdapter, RecordsFileManager } from "./src/recordsFile";
@@ -96,8 +96,8 @@ export default class TimeRecorderPlugin extends Plugin {
   }
 
   onunload() {
-    this.app.workspace.detachLeavesOfType(VIEW_TYPE_TODAY_SUMMARY);
-    this.app.workspace.detachLeavesOfType(VIEW_TYPE_TIMELINE);
+    // 故意不在此 detach 自定义视图：Obsidian 在插件卸载时会自动清理已注册视图的 leaf。
+    // 手动 detach 是官方反模式，会与启动时的布局恢复竞争、可能造成重复视图。
   }
 
   async refreshAll(): Promise<void> {
@@ -116,21 +116,32 @@ export default class TimeRecorderPlugin extends Plugin {
 
   async activateSummaryView() {
     const { workspace } = this.app;
-    let leaf = workspace.getLeavesOfType(VIEW_TYPE_TODAY_SUMMARY)[0];
-    if (!leaf) {
+    const leaves = workspace.getLeavesOfType(VIEW_TYPE_TODAY_SUMMARY);
+    let leaf: WorkspaceLeaf;
+    if (leaves.length > 0) {
+      // 复用第一个；关掉竞态/布局恢复可能残留的重复 leaf（自愈）
+      leaf = leaves[0];
+      for (let i = 1; i < leaves.length; i++) leaves[i].detach();
+    } else {
       leaf = workspace.getRightLeaf(false) ?? workspace.getLeaf(true);
       await leaf.setViewState({ type: VIEW_TYPE_TODAY_SUMMARY, active: true });
     }
     workspace.revealLeaf(leaf);
-    // Refresh
-    const view = leaf.view as TodaySummaryView;
-    await view.refresh();
+    // Refresh（instanceof 守卫：deferred 视图的 view 可能尚未实例化）
+    if (leaf.view instanceof TodaySummaryView) {
+      await leaf.view.refresh();
+    }
   }
 
   async activateTimelineView() {
     const { workspace } = this.app;
-    let leaf = workspace.getLeavesOfType(VIEW_TYPE_TIMELINE)[0];
-    if (!leaf) {
+    const leaves = workspace.getLeavesOfType(VIEW_TYPE_TIMELINE);
+    let leaf: WorkspaceLeaf;
+    if (leaves.length > 0) {
+      // 复用第一个；关掉残留的重复 leaf（自愈）
+      leaf = leaves[0];
+      for (let i = 1; i < leaves.length; i++) leaves[i].detach();
+    } else {
       leaf = workspace.getLeaf(true);
       await leaf.setViewState({ type: VIEW_TYPE_TIMELINE, active: true });
     }
