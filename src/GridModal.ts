@@ -6,6 +6,7 @@ import { punchIn, undoLast } from "./punchIn";
 import { nowHHMM, minutesDiff, formatDuration, isOpenEnd } from "./time";
 import { getTodayDateString } from "./date";
 import { openTodayFile, showPunchSuccessNotice } from "./openTodayFile";
+import { segmentColor } from "./segmentColor";
 
 export class GridModal extends Modal {
   constructor(
@@ -95,12 +96,19 @@ export class GridModal extends Modal {
 
   private renderCell(
     parent: HTMLElement,
-    _cat: Category | null,
+    cat: Category | null,
     emoji: string,
     label: string,
     onClick: () => void,
   ) {
     const cell = parent.createDiv({ cls: "tr-cell" });
+    if (cat) {
+      const color = segmentColor(cat.id, this.settings.categories);
+      if (color) {
+        cell.style.setProperty("--tr-cat-bg", color.bg);
+        cell.style.setProperty("--tr-cat-border", color.border);
+      }
+    }
     cell.createDiv({ cls: "tr-cell-emoji", text: emoji });
     cell.createDiv({ cls: "tr-cell-label", text: label });
     cell.addEventListener("click", onClick);
