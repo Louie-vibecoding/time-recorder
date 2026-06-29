@@ -204,6 +204,8 @@
   position: relative;
   width: 100%;
   border-left: 2px solid var(--background-modifier-border);
+  /* 底部留白，确保最底「24」刻度标签完整可见、不被容器边缘裁掉 */
+  margin-bottom: var(--size-4-3);
 }
 
 .tr-hour-row {

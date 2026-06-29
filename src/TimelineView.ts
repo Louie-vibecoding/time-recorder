@@ -76,8 +76,8 @@ export class TimelineView extends ItemView {
     const body = this.container.createDiv({ cls: "tr-timeline-body" });
     body.style.height = `${TOTAL_HEIGHT_PX}px`;
 
-    // 24 条小时网格线
-    for (let h = 0; h < 24; h++) {
+    // 25 条小时网格线（00:00 到 24:00，含底部午夜刻度，让一天完整有头有尾）
+    for (let h = 0; h <= 24; h++) {
       const row = body.createDiv({ cls: "tr-hour-row" });
       row.style.top = `${h * PIXELS_PER_HOUR}px`;
       row.createDiv({ cls: "tr-hour-label", text: String(h).padStart(2, "0") });
