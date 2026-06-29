@@ -161,6 +161,15 @@
   border-top: 2px solid var(--background-modifier-border);
 }
 
+.tr-cat-dot {
+  display: inline-block;
+  width: 0.7em;
+  height: 0.7em;
+  border-radius: 50%;
+  margin-right: 0.4em;
+  vertical-align: middle;
+}
+
 .tr-summary-footer {
   margin-top: var(--size-4-4);
   text-align: right;

@@ -4,6 +4,7 @@ import { RecordsFileManager } from "./recordsFile";
 import { summarizeDay, formatSummaryAsMarkdown } from "./summarize";
 import { nowHHMM, formatDuration } from "./time";
 import { getTodayDateString } from "./date";
+import { segmentColor } from "./segmentColor";
 
 export const VIEW_TYPE_TODAY_SUMMARY = "time-recorder-today-summary";
 
@@ -66,7 +67,13 @@ export class TodaySummaryView extends ItemView {
     summary.byCategory.forEach((b, i) => {
       const row = tbody.createEl("tr");
       row.createEl("td", { text: String(i + 1) });
-      row.createEl("td", { text: `${b.emoji} ${b.name}` });
+      const catTd = row.createEl("td");
+      const color = segmentColor(b.categoryId, this.settings.categories);
+      if (color) {
+        const dot = catTd.createSpan({ cls: "tr-cat-dot" });
+        dot.style.background = color.accent;
+      }
+      catTd.createSpan({ text: `${b.emoji} ${b.name}` });
       row.createEl("td", { text: formatDuration(b.minutes) });
       row.createEl("td", { text: `${b.percent.toFixed(1)}%` });
     });
