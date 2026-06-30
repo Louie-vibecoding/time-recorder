@@ -28,7 +28,7 @@
 
 ### 手动安装
 
-1. 从 [Release 页](https://github.com/<your-username>/time-recorder/releases) 下载 `manifest.json`、`main.js`、`styles.css`
+1. 从 [Release 页](https://github.com/Louie-vibecoding/time-recorder/releases) 下载 `manifest.json`、`main.js`、`styles.css`
 2. 放到 `<你的 vault>/.obsidian/plugins/time-recorder/`
 3. 重载 Obsidian → 启用
 

@@ -28,7 +28,7 @@ Works on **Desktop and Android** from a single codebase.
 
 ### Manual
 
-1. Download `manifest.json`, `main.js`, and `styles.css` from the latest [release](https://github.com/<your-username>/time-recorder/releases)
+1. Download `manifest.json`, `main.js`, and `styles.css` from the latest [release](https://github.com/Louie-vibecoding/time-recorder/releases)
 2. Put them in `<your-vault>/.obsidian/plugins/time-recorder/`
 3. Reload Obsidian → enable the plugin
 

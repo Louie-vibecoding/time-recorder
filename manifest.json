@@ -5,5 +5,6 @@
   "minAppVersion": "1.5.0",
   "description": "Track time with two-click punch-in. Daily summary and timeline back-fill, all stored as Markdown.",
   "author": "Louie",
+  "authorUrl": "https://github.com/Louie-vibecoding",
   "isDesktopOnly": false
 }
