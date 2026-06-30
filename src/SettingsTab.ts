@@ -1,4 +1,4 @@
-import { App, Modal, Notice, PluginSettingTab, Setting } from "obsidian";
+import { App, Modal, Notice, PluginSettingTab, Setting, debounce } from "obsidian";
 import TimeRecorderPlugin from "../main";
 import { DEFAULT_CATEGORIES, DEFAULT_SETTINGS, OTHER_CATEGORY } from "./settings";
 import { Category } from "./types";
@@ -10,9 +10,22 @@ export class TimeRecorderSettingsTab extends PluginSettingTab {
     super(app, plugin);
   }
 
+  // 文本框输入用：停止输入约 0.6s 才落盘+刷新，避免每敲一个字就写 data.json + 全量重渲。
+  // resetTimer=true → 每次输入都重置计时（等用户真正停下）。
+  private debouncedPersist = debounce(() => {
+    void this.persist();
+  }, 600, true);
+
   private async persist(): Promise<void> {
     await this.plugin.saveSettings();
     await this.plugin.refreshAll();
+  }
+
+  // 离开设置页时立即把最后一次（可能还在 debounce 窗口内的）改动落盘，防丢。
+  // 先取消 pending 的 debounce，避免离开后再多触发一次刷新。
+  hide(): void {
+    this.debouncedPersist.cancel();
+    void this.persist();
   }
 
   display(): void {
@@ -28,9 +41,9 @@ export class TimeRecorderSettingsTab extends PluginSettingTab {
         text
           .setPlaceholder(DEFAULT_SETTINGS.recordsFolder)
           .setValue(this.plugin.settings.recordsFolder)
-          .onChange(async (value) => {
+          .onChange((value) => {
             this.plugin.settings.recordsFolder = value.trim() || DEFAULT_SETTINGS.recordsFolder;
-            await this.persist();
+            this.debouncedPersist();
           }),
       );
 
@@ -41,9 +54,9 @@ export class TimeRecorderSettingsTab extends PluginSettingTab {
         text
           .setPlaceholder(DEFAULT_SETTINGS.templatePath)
           .setValue(this.plugin.settings.templatePath)
-          .onChange(async (value) => {
+          .onChange((value) => {
             this.plugin.settings.templatePath = value.trim() || DEFAULT_SETTINGS.templatePath;
-            await this.persist();
+            this.debouncedPersist();
           }),
       );
 
@@ -107,9 +120,9 @@ export class TimeRecorderSettingsTab extends PluginSettingTab {
       text
         .setPlaceholder("❓")
         .setValue(cat.emoji)
-        .onChange(async (value) => {
+        .onChange((value) => {
           this.plugin.settings.categories[index].emoji = value.trim();
-          await this.persist();
+          this.debouncedPersist();
         });
       text.inputEl.addClass("tr-emoji-input");
     });
@@ -119,14 +132,14 @@ export class TimeRecorderSettingsTab extends PluginSettingTab {
       text
         .setPlaceholder("分类名")
         .setValue(cat.name)
-        .onChange(async (value) => {
+        .onChange((value) => {
           const err = validateCategoryName(value, this.plugin.settings.categories, index);
           if (err) {
             new Notice(err);
             return;
           }
           this.plugin.settings.categories[index].name = value.trim();
-          await this.persist();
+          this.debouncedPersist();
         }),
     );
 
@@ -135,9 +148,9 @@ export class TimeRecorderSettingsTab extends PluginSettingTab {
       text
         .setPlaceholder("关键词，逗号分隔")
         .setValue(cat.aliases.join(", "))
-        .onChange(async (value) => {
+        .onChange((value) => {
           this.plugin.settings.categories[index].aliases = parseAliases(value);
-          await this.persist();
+          this.debouncedPersist();
         });
       text.inputEl.addClass("tr-alias-input");
     });

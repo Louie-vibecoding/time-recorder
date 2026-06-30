@@ -298,7 +298,8 @@
   margin: 0.25em 0 0.75em;
 }
 .tr-category-row .tr-emoji-input {
-  width: 3em;
+  width: 4.5em;
+  min-height: 44px;
   text-align: center;
 }
 .tr-category-row .tr-alias-input {
