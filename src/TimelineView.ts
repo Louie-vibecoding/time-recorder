@@ -6,7 +6,13 @@ import { parseHHMM, formatHHMM, nowHHMM, isOpenEnd } from "./time";
 import { formatSegmentLine, replaceLine } from "./parser";
 import { SegmentEditorModal } from "./SegmentEditorModal";
 import { segmentColor } from "./segmentColor";
-import { halfHourGridTicks, snapStartToHalfHour } from "./timelineGrid";
+import {
+  halfHourGridTicks,
+  snapStartToHalfHour,
+  blockHeight,
+  isShortSegment,
+  MIN_SEGMENT_HEIGHT_PX,
+} from "./timelineGrid";
 
 export const VIEW_TYPE_TIMELINE = "time-recorder-timeline";
 
@@ -163,9 +169,14 @@ export class TimelineView extends ItemView {
     if (isNaN(startMin) || isNaN(endMin) || endMin <= startMin) return;
 
     const top = (startMin / 60) * PIXELS_PER_HOUR;
-    const height = ((endMin - startMin) / 60) * PIXELS_PER_HOUR;
+    // 短段（真实高度不足半小时）撑到最小高度，让标签文字放得下（决策：可读优先）。
+    const height = blockHeight(startMin, endMin, MIN_SEGMENT_HEIGHT_PX);
 
     const block = parent.createDiv({ cls: "tr-segment-block" });
+    // 被撑高的短段抬 z-index，浮到紧接的下一段之上，否则文字会被下一段盖住。
+    if (isShortSegment(startMin, endMin, MIN_SEGMENT_HEIGHT_PX)) {
+      block.addClass("tr-segment-short");
+    }
     block.style.top = `${top}px`;
     block.style.height = `${height}px`;
 
@@ -231,7 +242,12 @@ export class TimelineView extends ItemView {
 
       const paint = (newStart: number, newEnd: number) => {
         block.style.top = `${(newStart / 60) * PIXELS_PER_HOUR}px`;
-        block.style.height = `${((newEnd - newStart) / 60) * PIXELS_PER_HOUR}px`;
+        // 与 render 口径一致：短段撑到最小高度并同步 .tr-segment-short，避免拖拽预览跳变。
+        block.style.height = `${blockHeight(newStart, newEnd, MIN_SEGMENT_HEIGHT_PX)}px`;
+        block.toggleClass(
+          "tr-segment-short",
+          isShortSegment(newStart, newEnd, MIN_SEGMENT_HEIGHT_PX),
+        );
         const endLabel = newEnd >= 24 * 60 ? "24:00" : formatHHMM(newEnd);
         block.setText(`${emoji} ${seg.activity} (${formatHHMM(newStart)}-${endLabel})`);
       };

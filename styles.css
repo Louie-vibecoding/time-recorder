@@ -265,6 +265,11 @@
   background: var(--background-modifier-active-hover);
 }
 
+/* 被撑到最小高度的短段：浮到紧接的下一段之上，避免标签被盖住。 */
+.tr-segment-short {
+  z-index: 1;
+}
+
 /* === Segment Editor Modal === */
 .tr-editor-modal .modal-content {
   padding: var(--size-4-4);
