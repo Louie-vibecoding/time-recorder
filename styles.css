@@ -236,6 +236,15 @@
   padding: 0 var(--size-2-2);
 }
 
+/* 半点刻度：虚线 + 标签更淡一档，弱化于整点，便于一眼区分整点/半点 */
+.tr-half-row {
+  border-top-style: dashed;
+}
+
+.tr-half-row .tr-hour-label {
+  color: var(--text-faint);
+}
+
 .tr-segment-block {
   position: absolute;
   left: 48px;

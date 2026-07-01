@@ -6,6 +6,7 @@ import { parseHHMM, formatHHMM, nowHHMM, isOpenEnd } from "./time";
 import { formatSegmentLine, replaceLine } from "./parser";
 import { SegmentEditorModal } from "./SegmentEditorModal";
 import { segmentColor } from "./segmentColor";
+import { halfHourGridTicks, snapStartToHalfHour } from "./timelineGrid";
 
 export const VIEW_TYPE_TIMELINE = "time-recorder-timeline";
 
@@ -77,11 +78,14 @@ export class TimelineView extends ItemView {
     const body = this.container.createDiv({ cls: "tr-timeline-body" });
     body.style.height = `${TOTAL_HEIGHT_PX}px`;
 
-    // 25 条小时网格线（00:00 到 24:00，含底部午夜刻度，让一天完整有头有尾）
-    for (let h = 0; h <= 24; h++) {
-      const row = body.createDiv({ cls: "tr-hour-row" });
-      row.style.top = `${h * PIXELS_PER_HOUR}px`;
-      row.createDiv({ cls: "tr-hour-label", text: String(h).padStart(2, "0") });
+    // 49 条半小时网格线（00:00 到 24:00，含底部午夜刻度）。半点行更淡（tr-half-row）。
+    const pxPerMin = PIXELS_PER_HOUR / 60;
+    for (const tick of halfHourGridTicks()) {
+      const row = body.createDiv({
+        cls: tick.isHalf ? "tr-hour-row tr-half-row" : "tr-hour-row",
+      });
+      row.style.top = `${tick.minutes * pxPerMin}px`;
+      row.createDiv({ cls: "tr-hour-label", text: tick.label });
     }
 
     // 渲染当天 segments
@@ -110,8 +114,8 @@ export class TimelineView extends ItemView {
 
   private handleEmptySlotClick(yPx: number, day: { segments: Segment[] }) {
     const clickedMin = Math.floor((yPx / PIXELS_PER_HOUR) * 60);
-    const start = formatHHMM(Math.floor(clickedMin / 60) * 60); // 整点
-    const startMin = parseHHMM(start);
+    const startMin = snapStartToHalfHour(clickedMin); // 吸附最近半小时
+    const start = formatHHMM(startMin);
 
     // 找第一个开始时间晚于 clickedMin 的已有段
     const candidates = day.segments
