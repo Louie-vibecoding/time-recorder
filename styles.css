@@ -332,3 +332,18 @@
 .tr-other-row {
   opacity: 0.8;
 }
+
+/* === Summary period tabs / nav === */
+.tr-summary-tabs,
+.tr-summary-nav {
+  display: flex;
+  gap: var(--size-4-2);
+  flex-wrap: wrap;
+  margin-bottom: var(--size-4-2);
+}
+
+.tr-summary-tabs button,
+.tr-summary-nav button {
+  min-height: 44px; /* 移动端点触 */
+  padding: 0 var(--size-4-3);
+}
