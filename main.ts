@@ -10,6 +10,7 @@ import { TodaySummaryView, VIEW_TYPE_TODAY_SUMMARY } from "./src/TodaySummaryVie
 import { TimelineView, VIEW_TYPE_TIMELINE } from "./src/TimelineView";
 import { getTodayDateString } from "./src/date";
 import { TimeRecorderSettingsTab } from "./src/SettingsTab";
+import { splitDuplicateLeaves } from "./src/leafDedup";
 
 export default class TimeRecorderPlugin extends Plugin {
   settings!: TimeRecorderSettings;
@@ -34,6 +35,11 @@ export default class TimeRecorderPlugin extends Plugin {
         console.warn("Time Recorder: could not ensure today's file:", err);
       }
     });
+
+    // 启动时收敛重复视图：Obsidian 会恢复持久化的自定义视图 leaf，历史遗留的重复
+    // leaf 也随之被恢复出来（表现为“两个今日汇总/时间轴”）。等布局恢复完成后，
+    // 每种类型只留第一个、detach 其余——不依赖用户手动点 ribbon 才自愈（根治重复视图）。
+    this.app.workspace.onLayoutReady(() => this.dedupeAllViews());
 
     // Ribbon icon
     const ribbon = this.addRibbonIcon("clock", "Time Recorder: Punch in", () => {
@@ -114,15 +120,28 @@ export default class TimeRecorderPlugin extends Plugin {
     }
   }
 
+  /**
+   * 某类型自定义视图去重：保留第一个 leaf、detach 其余。返回保留的 leaf（无则 undefined）。
+   * 启动去重与用户激活共用同一逻辑，保证“任何时候都只剩一个”。
+   */
+  private dedupeLeaves(viewType: string): WorkspaceLeaf | undefined {
+    const { keep, extras } = splitDuplicateLeaves(
+      this.app.workspace.getLeavesOfType(viewType),
+    );
+    for (const leaf of extras) leaf.detach();
+    return keep ?? undefined;
+  }
+
+  /** 启动时收敛所有自定义视图的重复 leaf。 */
+  private dedupeAllViews(): void {
+    this.dedupeLeaves(VIEW_TYPE_TODAY_SUMMARY);
+    this.dedupeLeaves(VIEW_TYPE_TIMELINE);
+  }
+
   async activateSummaryView() {
     const { workspace } = this.app;
-    const leaves = workspace.getLeavesOfType(VIEW_TYPE_TODAY_SUMMARY);
-    let leaf: WorkspaceLeaf;
-    if (leaves.length > 0) {
-      // 复用第一个；关掉竞态/布局恢复可能残留的重复 leaf（自愈）
-      leaf = leaves[0];
-      for (let i = 1; i < leaves.length; i++) leaves[i].detach();
-    } else {
+    let leaf = this.dedupeLeaves(VIEW_TYPE_TODAY_SUMMARY);
+    if (!leaf) {
       leaf = workspace.getRightLeaf(false) ?? workspace.getLeaf(true);
       await leaf.setViewState({ type: VIEW_TYPE_TODAY_SUMMARY, active: true });
     }
@@ -135,13 +154,8 @@ export default class TimeRecorderPlugin extends Plugin {
 
   async activateTimelineView() {
     const { workspace } = this.app;
-    const leaves = workspace.getLeavesOfType(VIEW_TYPE_TIMELINE);
-    let leaf: WorkspaceLeaf;
-    if (leaves.length > 0) {
-      // 复用第一个；关掉残留的重复 leaf（自愈）
-      leaf = leaves[0];
-      for (let i = 1; i < leaves.length; i++) leaves[i].detach();
-    } else {
+    let leaf = this.dedupeLeaves(VIEW_TYPE_TIMELINE);
+    if (!leaf) {
       leaf = workspace.getLeaf(true);
       await leaf.setViewState({ type: VIEW_TYPE_TIMELINE, active: true });
     }
