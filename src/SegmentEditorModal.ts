@@ -1,9 +1,9 @@
 import { App, Modal, Notice } from "obsidian";
 import { TimeRecorderSettings, Segment } from "./types";
 import { RecordsFileManager } from "./recordsFile";
-import { parseHHMM } from "./time";
 import { formatSegmentLine, replaceLine, appendLine } from "./parser";
 import { inferCategoryId } from "./categoryInfer";
+import { validateSegmentTimes } from "./segmentEdit";
 
 export type EditorMode =
   | { kind: "new"; start: string; end: string }
@@ -49,7 +49,7 @@ export class SegmentEditorModal extends Modal {
     startInput.addEventListener("input", () => (this.start = startInput.value));
 
     const endRow = contentEl.createDiv({ cls: "tr-form-row" });
-    endRow.createEl("label", { text: "结束" });
+    endRow.createEl("label", { text: "结束（留空 = 进行中）" });
     const endInput = endRow.createEl("input", { type: "time", value: this.end });
     endInput.addEventListener("input", () => (this.end = endInput.value));
 
@@ -73,25 +73,18 @@ export class SegmentEditorModal extends Modal {
   }
 
   private async handleSave() {
-    const startMin = parseHHMM(this.start);
-    const endMin = parseHHMM(this.end);
-    if (isNaN(startMin)) {
-      new Notice("开始时间无效");
+    const validation = validateSegmentTimes(this.start, this.end);
+    if (!validation.ok) {
+      new Notice(validation.error ?? "时间无效");
       return;
     }
-    if (isNaN(endMin)) {
-      new Notice("结束时间无效");
-      return;
-    }
-    if (endMin <= startMin) {
-      new Notice("结束时间必须晚于开始时间");
-      return;
-    }
+    const finalEnd = validation.normalizedEnd!; // "ing"（进行中）或有效 "HH:MM"
+    const inProgress = finalEnd === "ing";
 
     const activityText = this.activity.trim() || "未命名";
     const newSegment: Segment = {
       start: this.start,
-      end: this.end,
+      end: finalEnd,
       activity: activityText,
       categoryId: inferCategoryId(activityText, this.settings.categories),
       lineNumber: this.mode.kind === "edit" ? this.mode.segment.lineNumber : -1,
@@ -104,7 +97,8 @@ export class SegmentEditorModal extends Modal {
           ? replaceLine(before, this.mode.segment.lineNumber, formatSegmentLine(newSegment))
           : appendLine(before, formatSegmentLine(newSegment));
       await this.recordsFile.writeDayContent(this.date, after);
-      new Notice(this.mode.kind === "edit" ? "已更新 ✅" : "已新建 ✅");
+      const verb = this.mode.kind === "edit" ? "已更新" : "已新建";
+      new Notice(inProgress ? `${verb}（进行中）✅` : `${verb} ✅`);
       this.close();
       this.onSaved?.();
     } catch (err) {
