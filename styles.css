@@ -265,8 +265,17 @@
   background: var(--background-modifier-active-hover);
 }
 
-/* 被撑到最小高度的短段：浮到紧接的下一段之上，避免标签被盖住。 */
+/* 短段：色块保持真实（矮）高度、绝不重叠；标签横排到色条右端的空白处，
+   垂直居中、允许上下微露，与相邻长段的左上标签水平错开，互不遮挡。
+   z-index 抬升，避免露出的文字被相邻色块裁切。 */
 .tr-segment-short {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  white-space: nowrap;
+  overflow: visible;
+  padding-top: 0;
+  padding-bottom: 0;
   z-index: 1;
 }
 

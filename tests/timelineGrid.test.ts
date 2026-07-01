@@ -2,9 +2,8 @@ import { describe, it, expect } from "vitest";
 import {
   snapStartToHalfHour,
   halfHourGridTicks,
-  blockHeight,
   isShortSegment,
-  MIN_SEGMENT_HEIGHT_PX,
+  SHORT_SEGMENT_THRESHOLD_PX,
 } from "../src/timelineGrid";
 
 describe("snapStartToHalfHour", () => {
@@ -58,47 +57,27 @@ describe("halfHourGridTicks", () => {
   });
 });
 
-describe("MIN_SEGMENT_HEIGHT_PX", () => {
-  it("= 30（半小时）", () => {
-    expect(MIN_SEGMENT_HEIGHT_PX).toBe(30);
-  });
-});
-
-describe("blockHeight", () => {
-  it("长段按真实时长（1px/分钟）", () => {
-    expect(blockHeight(0, 330, MIN_SEGMENT_HEIGHT_PX)).toBe(330); // 00:00-05:30
-    expect(blockHeight(360, 691, MIN_SEGMENT_HEIGHT_PX)).toBe(331); // 06:00-11:31
-  });
-
-  it("恰好半小时 = 30px（不撑）", () => {
-    expect(blockHeight(0, 30, MIN_SEGMENT_HEIGHT_PX)).toBe(30);
-  });
-
-  it("短段撑到最小高度", () => {
-    expect(blockHeight(350, 360, MIN_SEGMENT_HEIGHT_PX)).toBe(30); // 10 分钟 → 30px
-    expect(blockHeight(0, 5, MIN_SEGMENT_HEIGHT_PX)).toBe(30); // 5 分钟 → 30px
-  });
-
-  it("minPx 参数化可覆盖", () => {
-    expect(blockHeight(0, 10, 22)).toBe(22);
-    expect(blockHeight(0, 40, 22)).toBe(40);
+describe("SHORT_SEGMENT_THRESHOLD_PX", () => {
+  it("= 30（不足半小时的段文字外置）", () => {
+    expect(SHORT_SEGMENT_THRESHOLD_PX).toBe(30);
   });
 });
 
 describe("isShortSegment", () => {
-  it("真实高度 < minPx → true", () => {
-    expect(isShortSegment(350, 360, MIN_SEGMENT_HEIGHT_PX)).toBe(true); // 10 分钟
+  it("真实高度 < 阈值 → true（文字外置到右侧）", () => {
+    expect(isShortSegment(350, 360, SHORT_SEGMENT_THRESHOLD_PX)).toBe(true); // 10 分钟
+    expect(isShortSegment(0, 5, SHORT_SEGMENT_THRESHOLD_PX)).toBe(true); // 5 分钟
   });
 
-  it("恰好等于 minPx → false（不算短）", () => {
-    expect(isShortSegment(0, 30, MIN_SEGMENT_HEIGHT_PX)).toBe(false);
+  it("恰好等于阈值 → false（不算短）", () => {
+    expect(isShortSegment(0, 30, SHORT_SEGMENT_THRESHOLD_PX)).toBe(false);
   });
 
   it("长段 → false", () => {
-    expect(isShortSegment(0, 330, MIN_SEGMENT_HEIGHT_PX)).toBe(false);
+    expect(isShortSegment(0, 330, SHORT_SEGMENT_THRESHOLD_PX)).toBe(false);
   });
 
-  it("minPx 参数化可覆盖", () => {
+  it("阈值参数化可覆盖", () => {
     expect(isShortSegment(0, 10, 22)).toBe(true);
     expect(isShortSegment(0, 25, 22)).toBe(false);
   });

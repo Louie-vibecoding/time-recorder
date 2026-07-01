@@ -12,31 +12,22 @@ const HALF = 30;
 const DAY_MIN = 24 * 60;
 const PX_PER_MIN = 1; // 时间轴 PIXELS_PER_HOUR=60 → 1px/分钟
 
-/** 色块最小高度（像素）= 半小时。短段撑到此高度以放下一行标签文字。 */
-export const MIN_SEGMENT_HEIGHT_PX = 30;
-
 /**
- * 色块渲染高度：真实时长高度（1px/分钟）与 minPx 取大。
- * 短段被撑到 minPx，保证标签文字放得下。
+ * 短段判定阈值（像素）。真实高度不足此值的段太矮，塞不下一行标签，
+ * 改为把标签横排到色条右侧空白处（.tr-segment-short）。30px≈半小时≈一行字。
  */
-export function blockHeight(
-  startMin: number,
-  endMin: number,
-  minPx: number,
-): number {
-  return Math.max((endMin - startMin) * PX_PER_MIN, minPx);
-}
+export const SHORT_SEGMENT_THRESHOLD_PX = 30;
 
 /**
- * 是否为被撑高的短段：真实高度严格小于 minPx。
- * 用于给块加 .tr-segment-short（抬 z-index 浮到下一段之上）。
+ * 是否为短段：真实高度（1px/分钟）严格小于阈值。
+ * 短段色块保持真实（矮）高度不重叠，标签外置到右侧（见 styles.css .tr-segment-short）。
  */
 export function isShortSegment(
   startMin: number,
   endMin: number,
-  minPx: number,
+  thresholdPx: number,
 ): boolean {
-  return (endMin - startMin) * PX_PER_MIN < minPx;
+  return (endMin - startMin) * PX_PER_MIN < thresholdPx;
 }
 
 /**
