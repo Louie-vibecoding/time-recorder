@@ -74,3 +74,76 @@ export function formatSummaryAsMarkdown(day: DayRecord, summary: DaySummary, _ca
   lines.push("| | **合计** | **24h** | 100% | |");
   return lines.join("\n");
 }
+
+export interface PeriodSummary {
+  totalRecordedMinutes: number;
+  denominatorMinutes: number;
+  unrecordedMinutes: number;
+  unrecordedPercent: number;
+  byCategory: CategoryBucket[];
+}
+
+/**
+ * 多日聚合。分母（已过去时间）由调用方算好传入。
+ * 进行中段收口：今天→now，过去某天→"24:00"（忘关的段算到当天午夜）。
+ */
+export function summarizePeriod(
+  days: DayRecord[],
+  categories: Category[],
+  opts: { today: string; now: string; denominatorMinutes: number },
+): PeriodSummary {
+  const minutesByCat = new Map<string, number>();
+  const actsByCat = new Map<string, string[]>();
+
+  for (const day of days) {
+    for (const seg of day.segments) {
+      const end = isOpenEnd(seg.end) ? (day.date === opts.today ? opts.now : "24:00") : seg.end;
+      const mins = minutesDiff(seg.start, end);
+      if (mins <= 0) continue;
+      minutesByCat.set(seg.categoryId, (minutesByCat.get(seg.categoryId) ?? 0) + mins);
+      const list = actsByCat.get(seg.categoryId) ?? [];
+      if (!list.includes(seg.activity)) list.push(seg.activity);
+      actsByCat.set(seg.categoryId, list);
+    }
+  }
+
+  const denom = opts.denominatorMinutes;
+  const buckets: CategoryBucket[] = [];
+  for (const [catId, mins] of minutesByCat) {
+    const cat = categories.find((c) => c.id === catId);
+    buckets.push({
+      categoryId: catId,
+      emoji: cat?.emoji ?? "❓",
+      name: cat?.name ?? catId,
+      minutes: mins,
+      percent: denom > 0 ? (mins / denom) * 100 : 0,
+      activities: actsByCat.get(catId) ?? [],
+    });
+  }
+  buckets.sort((a, b) => b.minutes - a.minutes);
+
+  const totalRecorded = buckets.reduce((s, b) => s + b.minutes, 0);
+  const unrecorded = Math.max(0, denom - totalRecorded);
+  return {
+    totalRecordedMinutes: totalRecorded,
+    denominatorMinutes: denom,
+    unrecordedMinutes: unrecorded,
+    unrecordedPercent: denom > 0 ? (unrecorded / denom) * 100 : 0,
+    byCategory: buckets,
+  };
+}
+
+export function formatPeriodSummaryAsMarkdown(title: string, summary: PeriodSummary): string {
+  const lines: string[] = [];
+  lines.push(`## 时间总结（${title}）`);
+  lines.push("");
+  lines.push("| 排名 | 类别 | 时长 | 占比 | 包含活动 |");
+  lines.push("|---|---|---|---|---|");
+  summary.byCategory.forEach((b, i) => {
+    const acts = b.activities.join(" / ");
+    lines.push(`| ${i + 1} | ${b.emoji} ${b.name} | **${formatDuration(b.minutes)}** | ${b.percent.toFixed(1)}% | ${acts} |`);
+  });
+  lines.push(`| - | ⚪ 未记录 | ${formatDuration(summary.unrecordedMinutes)} | ${summary.unrecordedPercent.toFixed(1)}% | |`);
+  lines.push(`| | **合计** | **${formatDuration(summary.denominatorMinutes)}** | 100% | |`);
+  return lines.join("\n");
+}
