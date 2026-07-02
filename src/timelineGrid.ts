@@ -17,13 +17,13 @@ const PX_PER_MIN = 1; // 时间轴 PIXELS_PER_HOUR=60 → 1px/分钟
 
 /**
  * 短段判定阈值（像素）。真实高度不足此值的段太矮，塞不下一行标签，
- * 改为把标签横排到色条右侧空白处（.tr-segment-short）。30px≈半小时≈一行字。
+ * 标签改为左端垂直居中、允许上下微露（.tr-segment-short）。30px≈半小时≈一行字。
  */
 export const SHORT_SEGMENT_THRESHOLD_PX = 30;
 
 /**
  * 是否为短段：真实高度（1px/分钟）严格小于阈值。
- * 短段色块保持真实（矮）高度不重叠，标签外置到右侧（见 styles.css .tr-segment-short）。
+ * 短段色块保持真实（矮）高度不重叠，标签左端垂直居中上下微露（见 styles.css .tr-segment-short）。
  */
 export function isShortSegment(
   startMin: number,

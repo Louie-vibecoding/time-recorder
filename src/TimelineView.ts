@@ -227,7 +227,7 @@ export class TimelineView extends ItemView {
 
       const paint = (newStart: number, newEnd: number) => {
         block.style.top = `${(newStart / 60) * PIXELS_PER_HOUR}px`;
-        // 与 render 口径一致：真实高度 + 同步 .tr-segment-short（短段标签外置）。
+        // 与 render 口径一致：真实高度 + 同步 .tr-segment-short（短段标签左端上下微露）。
         block.style.height = `${((newEnd - newStart) / 60) * PIXELS_PER_HOUR}px`;
         block.toggleClass(
           "tr-segment-short",

@@ -265,13 +265,13 @@
   background: var(--background-modifier-active-hover);
 }
 
-/* 短段：色块保持真实（矮）高度、绝不重叠；标签横排到色条右端的空白处，
-   垂直居中、允许上下微露，与相邻长段的左上标签水平错开，互不遮挡。
+/* 短段：色块保持真实（矮）高度、绝不重叠；标签左端、垂直居中，
+   允许上下微露（overflow:visible），与长段左上标签方向一致 = 全时间轴统一左对齐。
    z-index 抬升，避免露出的文字被相邻色块裁切。 */
 .tr-segment-short {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: flex-start;
   white-space: nowrap;
   overflow: visible;
   padding-top: 0;
