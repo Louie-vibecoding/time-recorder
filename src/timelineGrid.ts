@@ -33,15 +33,6 @@ export function isShortSegment(
   return (endMin - startMin) * PX_PER_MIN < thresholdPx;
 }
 
-/**
- * 点空白新建段时，把点击分钟吸附到最近半小时。
- * 四舍五入到 30 分；下限 0、上限 23:30（避免落到 24:00 让 start=end）。
- */
-export function snapStartToHalfHour(clickedMin: number): number {
-  const snapped = Math.round(clickedMin / HALF) * HALF;
-  return Math.max(0, Math.min(snapped, DAY_MIN - HALF));
-}
-
 /** 生成 49 条半小时刻度（0..48 × 30 分，含底部 24:00）。 */
 export function halfHourGridTicks(): HalfHourTick[] {
   const ticks: HalfHourTick[] = [];
