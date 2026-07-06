@@ -48,7 +48,7 @@ export default class TimeRecorderPlugin extends Plugin {
     this.statusIndicator.attachRibbon(ribbon);
 
     // Ribbon icon for summary view (mobile entry independent of bottom toolbar)
-    this.addRibbonIcon("pie-chart", "Time Recorder: Today summary", () => {
+    this.addRibbonIcon("pie-chart", "Time Recorder: Summary", () => {
       this.activateSummaryView();
     });
 
@@ -90,7 +90,7 @@ export default class TimeRecorderPlugin extends Plugin {
 
     this.addCommand({
       id: "open-today-summary",
-      name: "Open today summary",
+      name: "Open summary",
       callback: () => this.activateSummaryView(),
     });
 

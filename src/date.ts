@@ -24,3 +24,20 @@ export function parseDateString(dateString: string): Date | null {
   const [, y, mo, d] = m;
   return new Date(parseInt(y, 10), parseInt(mo, 10) - 1, parseInt(d, 10));
 }
+
+/**
+ * 日视图「进行中段」收口用的 now：
+ * 看今天 → 传入的 now（算到此刻）；看其它日期 → "24:00"（忘关的段算到当天午夜，
+ * 与 summarizePeriod 对过去日的口径一致）。
+ */
+export function dayViewEffectiveNow(anchor: string, today: string, now: string): string {
+  return anchor === today ? now : "24:00";
+}
+
+/** 相对日标签：今天 / 昨天 / 明天 / ""（其余日期）。 */
+export function relativeDayLabel(anchor: string, today: string): string {
+  if (anchor === today) return "今天";
+  if (anchor === addDays(today, -1)) return "昨天";
+  if (anchor === addDays(today, 1)) return "明天";
+  return "";
+}

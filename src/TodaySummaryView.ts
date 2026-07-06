@@ -9,7 +9,7 @@ import {
   CategoryBucket,
 } from "./summarize";
 import { nowHHMM, formatDuration } from "./time";
-import { getTodayDateString, addDays } from "./date";
+import { getTodayDateString, addDays, dayViewEffectiveNow, relativeDayLabel } from "./date";
 import { weekRange, monthRange, enumerateDates, elapsedInPeriod } from "./periodRange";
 import { segmentColor } from "./segmentColor";
 
@@ -34,7 +34,7 @@ export class TodaySummaryView extends ItemView {
   }
 
   getDisplayText(): string {
-    return "Today Summary";
+    return "Summary";
   }
 
   getIcon(): string {
@@ -76,18 +76,40 @@ export class TodaySummaryView extends ItemView {
         }
       });
     };
-    mk("今日", "day");
+    mk("今天", "day");
     mk("本周", "week");
     mk("本月", "month");
   }
 
   private async renderDay(container: HTMLElement) {
     const today = getTodayDateString();
-    const day = await this.readDaySafe(today);
-    const summary = summarizeDay(day, this.settings.categories, nowHHMM());
+    const anchor = this.anchor;
+    const day = await this.readDaySafe(anchor);
+    // 进行中段收口：今天→now，其它日期→24:00（忘关的段算到午夜，与周/月一致）。
+    const now = dayViewEffectiveNow(anchor, today, nowHHMM());
+    const summary = summarizeDay(day, this.settings.categories, now);
 
+    // 导航：‹ 昨天 | 今天 | 明天 ›（镜像本周/本月）
+    const nav = container.createDiv({ cls: "tr-summary-nav" });
+    const prevBtn = nav.createEl("button", { text: "‹ 昨天" });
+    prevBtn.addEventListener("click", async () => {
+      this.anchor = addDays(anchor, -1);
+      await this.refresh();
+    });
+    const curBtn = nav.createEl("button", { text: "今天" });
+    curBtn.addEventListener("click", async () => {
+      this.anchor = getTodayDateString();
+      await this.refresh();
+    });
+    const nextBtn = nav.createEl("button", { text: "明天 ›" });
+    nextBtn.addEventListener("click", async () => {
+      this.anchor = addDays(anchor, 1);
+      await this.refresh();
+    });
+
+    const rel = relativeDayLabel(anchor, today);
     const header = container.createDiv({ cls: "tr-summary-header" });
-    header.createEl("h3", { text: `📅 ${today} 今日汇总` });
+    header.createEl("h3", { text: `📅 ${rel ? rel + " " : ""}${anchor}` });
     const sub = header.createEl("div", { cls: "tr-summary-sub" });
     sub.setText(
       `已记录 ${formatDuration(summary.totalRecordedMinutes)} / 24h（${(100 - summary.unrecordedPercent).toFixed(0)}%）`,

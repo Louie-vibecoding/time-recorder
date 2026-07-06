@@ -4,6 +4,8 @@ import {
   getDateFilename,
   addDays,
   parseDateString,
+  dayViewEffectiveNow,
+  relativeDayLabel,
 } from "../src/date";
 
 describe("getTodayDateString", () => {
@@ -45,5 +47,43 @@ describe("parseDateString", () => {
 
   it("returns null on bad input", () => {
     expect(parseDateString("bad")).toBeNull();
+  });
+});
+
+describe("dayViewEffectiveNow", () => {
+  it("returns now when anchor is today", () => {
+    expect(dayViewEffectiveNow("2026-7-6", "2026-7-6", "14:30")).toBe("14:30");
+  });
+
+  it("returns 24:00 for a past day (忘关的进行中段算到午夜)", () => {
+    expect(dayViewEffectiveNow("2026-7-5", "2026-7-6", "14:30")).toBe("24:00");
+  });
+
+  it("returns 24:00 for a future day", () => {
+    expect(dayViewEffectiveNow("2026-7-7", "2026-7-6", "14:30")).toBe("24:00");
+  });
+});
+
+describe("relativeDayLabel", () => {
+  it("labels today", () => {
+    expect(relativeDayLabel("2026-7-6", "2026-7-6")).toBe("今天");
+  });
+
+  it("labels yesterday", () => {
+    expect(relativeDayLabel("2026-7-5", "2026-7-6")).toBe("昨天");
+  });
+
+  it("labels tomorrow", () => {
+    expect(relativeDayLabel("2026-7-7", "2026-7-6")).toBe("明天");
+  });
+
+  it("returns empty string for other days", () => {
+    expect(relativeDayLabel("2026-7-1", "2026-7-6")).toBe("");
+    expect(relativeDayLabel("2026-7-10", "2026-7-6")).toBe("");
+  });
+
+  it("handles month boundary for yesterday/tomorrow", () => {
+    expect(relativeDayLabel("2026-6-30", "2026-7-1")).toBe("昨天");
+    expect(relativeDayLabel("2026-8-1", "2026-7-31")).toBe("明天");
   });
 });
