@@ -12,6 +12,7 @@ import { nowHHMM, formatDuration } from "./time";
 import { getTodayDateString, addDays, dayViewEffectiveNow, relativeDayLabel } from "./date";
 import { weekRange, monthRange, enumerateDates, elapsedInPeriod } from "./periodRange";
 import { segmentColor } from "./segmentColor";
+import { serialize } from "./serialize";
 
 export const VIEW_TYPE_TODAY_SUMMARY = "time-recorder-today-summary";
 
@@ -49,7 +50,10 @@ export class TodaySummaryView extends ItemView {
     /* noop */
   }
 
-  async refresh(): Promise<void> {
+  /** 串行化刷新：并发 refresh 交错会导致内容重复渲染（根因见 serialize.ts 注释） */
+  refresh: () => Promise<void> = serialize(() => this.doRefresh());
+
+  private async doRefresh(): Promise<void> {
     const container = this.containerEl.children[1] as HTMLElement;
     container.empty();
     container.addClass("tr-summary-container");

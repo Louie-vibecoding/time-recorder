@@ -6,6 +6,7 @@ import { parseHHMM, formatHHMM, nowHHMM, isOpenEnd } from "./time";
 import { formatSegmentLine, replaceLine } from "./parser";
 import { SegmentEditorModal } from "./SegmentEditorModal";
 import { segmentColor } from "./segmentColor";
+import { serialize } from "./serialize";
 import {
   halfHourGridTicks,
   emptySlotFill,
@@ -52,7 +53,10 @@ export class TimelineView extends ItemView {
     /* noop */
   }
 
-  async render() {
+  /** 串行化渲染：并发 render 交错会导致时间轴重复渲染（根因见 serialize.ts 注释） */
+  render: () => Promise<void> = serialize(() => this.doRender());
+
+  private async doRender() {
     this.container.empty();
     this.container.addClass("tr-timeline-container");
 
