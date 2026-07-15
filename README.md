@@ -2,11 +2,11 @@
 
 An Obsidian plugin for **two-click time tracking**. Record what you're doing right now, back-fill missed segments on a timeline, and get a live daily summary. All your data lives in your own Markdown files.
 
-Works on **desktop and mobile** from a single codebase. The UI is **bilingual**: Simplified Chinese when Obsidian's interface language is Chinese, English otherwise.
+Works on **desktop and mobile** from a single codebase. The UI is **bilingual**: Simplified Chinese when Obsidian's interface language is Chinese, English otherwise. Category names are your own data and are never auto-translated — after switching languages, hit **Restore default categories** in settings to get defaults in the new language; built-in keyword bridging keeps records written before the switch correctly categorized.
 
 ## 中文简介
 
-让你 **两次点击就能完成一次打卡** 的 Obsidian 时间记录插件。可实时打卡、可睡前补录、自动出今日汇总表。所有数据都在你自己的 Markdown 文件里。支持桌面端和移动端，同一套代码。界面中英双语：Obsidian 界面语言为中文时显示中文，其它语言显示英文。
+让你 **两次点击就能完成一次打卡** 的 Obsidian 时间记录插件。可实时打卡、可睡前补录、自动出今日汇总表。所有数据都在你自己的 Markdown 文件里。支持桌面端和移动端，同一套代码。界面中英双语：Obsidian 界面语言为中文时显示中文，其它语言显示英文。分类名属于你自己的数据、不会被自动翻译——切换界面语言后，在设置里点「恢复默认分类」即可获得对应语言的默认分类，内置的关键词桥接会让切换前的历史记录照样正确归类。
 
 ## Features
 
