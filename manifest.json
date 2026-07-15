@@ -1,8 +1,8 @@
 {
   "id": "time-recorder",
   "name": "Time Recorder",
-  "version": "1.0.0",
-  "minAppVersion": "1.5.0",
+  "version": "1.0.1",
+  "minAppVersion": "1.7.2",
   "description": "Track time with two-click punch-in. Daily summary and timeline back-fill, all stored as Markdown.",
   "author": "Louie",
   "authorUrl": "https://github.com/Louie-vibecoding",

@@ -2,6 +2,19 @@
 
 All notable changes to this project are documented here. This project follows [Semantic Versioning](https://semver.org/).
 
+## 1.0.1 — 2026-07-15
+
+Compliance release addressing Obsidian community review feedback. No feature changes.
+
+### Changed
+- Raised `minAppVersion` to 1.7.2 to match the `revealLeaf` API in use (fixes `no-unsupported-api`)
+- Settings tab uses `Setting.setHeading()` instead of raw HTML headings; removed the redundant plugin-name heading
+- All fire-and-forget promises are now explicitly `void`-marked or awaited; async DOM event handlers wrapped in sync handlers
+- `window.setTimeout` for popout-window compatibility
+- Vault adapter is typed with Obsidian's `App` (removed `any` and unsafe access warnings)
+- Build config imports `builtinModules` from `node:module` instead of the `builtin-modules` package
+- Release assets are built and attested (build provenance) in GitHub Actions CI
+
 ## 1.0.0 — 2026-07-15
 
 Initial public release.
