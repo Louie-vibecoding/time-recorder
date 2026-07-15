@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented here. This project follows [Semantic Versioning](https://semver.org/).
 
+## 1.0.3 — 2026-07-15
+
+### Changed
+- **"Restore default categories" now bridges languages**: restored categories carry the other language's category names and keywords as aliases, so records written before switching Obsidian's interface language still categorize correctly (nothing falls into Other). Fresh installs keep clean, single-language keyword lists.
+- Docs: merged the Chinese introduction into the main README and removed `README.zh.md` (its relative link was not clickable on the plugin listing page).
+
 ## 1.0.2 — 2026-07-15
 
 ### Added
