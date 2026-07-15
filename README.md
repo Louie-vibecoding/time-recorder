@@ -1,8 +1,8 @@
 # Time Recorder
 
-An Obsidian plugin for **two-click time tracking**. Record what you're doing right now, back-fill missed segments on a timeline, and get a live daily summary. Inspired by Chinese time-tracking apps like 爱时间 and 时间日志 — but all your data lives in your own Markdown files.
+An Obsidian plugin for **two-click time tracking**. Record what you're doing right now, back-fill missed segments on a timeline, and get a live daily summary. All your data lives in your own Markdown files.
 
-Works on **Desktop and Android** from a single codebase.
+Works on **desktop and mobile** from a single codebase.
 
 [中文说明 →](./README.zh.md)
 
