@@ -11,7 +11,7 @@ Works on **Desktop and Android** from a single codebase.
 - **Grid punch-in**: open a modal, tap a category — the previous open segment auto-closes and a new one starts. Two clicks total.
 - **Custom activity**: type a free-text activity name and pick a category for grouping.
 - **Timeline back-fill**: a 24-hour vertical timeline. Click an empty slot to add a segment (with smart-fill range to the next one), click an existing block to edit or delete. On desktop, drag the top/bottom edges to resize (snaps to 5 minutes).
-- **Today summary**: a sidebar (desktop) or full-screen view (Android) showing the breakdown by category. Copy it as a Markdown table for your daily review or to hand to an LLM.
+- **Summary**: a sidebar (desktop) or full-screen view (Android) with **today / week / month** tabs showing the breakdown by category, plus prev/next navigation within each period (yesterday/tomorrow, last/next week or month). Copy it as a Markdown table for your daily review or to hand to an LLM.
 - **1-step undo** on the latest punch.
 - **Status bar** (desktop) / **ribbon tooltip** (Android) shows what's currently in progress.
 - **Editable settings**: add / remove / rename categories, edit their keywords and the records folder — all from the settings tab, no file editing required. Restore defaults anytime.
@@ -63,7 +63,7 @@ The default categories are: 😴 睡眠 / 📚 学习 / 🍱 饮食 / 🚿 个�
 
 ## Roadmap
 
-- 1.1: multi-step undo, segment cut/paste, week/month summary
+- 1.1: multi-step undo, segment cut/paste
 - 1.2: summary charts
 - 1.3: tag dimension, Android notifications, Tasker integration
 
