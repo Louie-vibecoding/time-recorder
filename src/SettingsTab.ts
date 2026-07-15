@@ -1,6 +1,6 @@
 import { App, Modal, Notice, PluginSettingTab, Setting, debounce } from "obsidian";
 import TimeRecorderPlugin from "../main";
-import { defaultCategoriesFor, defaultSettingsFor, OTHER_CATEGORY } from "./settings";
+import { defaultCategoriesForRestore, defaultSettingsFor, OTHER_CATEGORY } from "./settings";
 import { Category } from "./types";
 import { generateCategoryId } from "./idgen";
 import { parseAliases, validateCategoryName } from "./settingsValidation";
@@ -101,7 +101,7 @@ export class TimeRecorderSettingsTab extends PluginSettingTab {
               this.app,
               t("resetConfirm"),
               async () => {
-                this.plugin.settings.categories = defaultCategoriesFor(getLang());
+                this.plugin.settings.categories = defaultCategoriesForRestore(getLang());
                 await this.persist();
                 this.display();
               },

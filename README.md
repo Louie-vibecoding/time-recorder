@@ -4,7 +4,9 @@ An Obsidian plugin for **two-click time tracking**. Record what you're doing rig
 
 Works on **desktop and mobile** from a single codebase. The UI is **bilingual**: Simplified Chinese when Obsidian's interface language is Chinese, English otherwise.
 
-[中文说明 →](./README.zh.md)
+## 中文简介
+
+让你 **两次点击就能完成一次打卡** 的 Obsidian 时间记录插件。可实时打卡、可睡前补录、自动出今日汇总表。所有数据都在你自己的 Markdown 文件里。支持桌面端和移动端，同一套代码。界面中英双语：Obsidian 界面语言为中文时显示中文，其它语言显示英文。
 
 ## Features
 

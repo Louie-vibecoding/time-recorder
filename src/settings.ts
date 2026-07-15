@@ -51,6 +51,27 @@ export function defaultCategoriesFor(lang: "zh" | "en"): Category[] {
 }
 
 /**
+ * 「恢复默认分类」专用：目标语言默认之上，把另一语言的名称+关键词并入 aliases
+ * （忽略大小写去重）。这样切换界面语言后点恢复，历史记录里旧语言写下的活动名
+ * （如「睡眠」「吃饭」）仍能正确归类，不会掉进 Other。
+ * 全新安装（defaultSettingsFor）不带桥接，保持关键词列表干净。
+ */
+export function defaultCategoriesForRestore(lang: "zh" | "en"): Category[] {
+  const base = defaultCategoriesFor(lang);
+  const twin = lang === "zh" ? DEFAULT_CATEGORIES_EN : DEFAULT_CATEGORIES;
+  for (const c of base) {
+    const tw = twin.find((o) => o.id === c.id);
+    if (!tw) continue;
+    for (const cand of [tw.name, ...tw.aliases]) {
+      if (!c.aliases.some((a) => a.trim().toLowerCase() === cand.trim().toLowerCase())) {
+        c.aliases.push(cand);
+      }
+    }
+  }
+  return base;
+}
+
+/**
  * 按语言取整套默认设置（深拷贝）。
  * 注意：记录文件名格式（"YYYY-M-D 时间记录.md"）是数据层约定，所有语言统一，
  * 不在此处本地化——否则切换界面语言会导致旧记录文件读不到。

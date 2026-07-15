@@ -12,6 +12,7 @@ import {
   DEFAULT_CATEGORIES,
   DEFAULT_CATEGORIES_EN,
   defaultCategoriesFor,
+  defaultCategoriesForRestore,
   defaultSettingsFor,
 } from "../src/settings";
 
@@ -148,5 +149,35 @@ describe("英文默认分类与设置", () => {
     expect(defaultSettingsFor("en").recordsFolder).toBe("Time Records");
     expect(defaultSettingsFor("en").categories[0].name).toBe("Sleep");
     expect(defaultSettingsFor("zh").categories[0].name).toBe("睡眠");
+  });
+});
+
+describe("defaultCategoriesForRestore 跨语言关键词桥接", () => {
+  it("en 恢复分类的关键词并入中文名+中文关键词（历史记录不掉 Other）", () => {
+    const meals = defaultCategoriesForRestore("en").find((c) => c.id === "meal")!;
+    expect(meals.name).toBe("Meals");
+    expect(meals.aliases).toContain("饮食");
+    expect(meals.aliases).toContain("吃饭");
+    expect(meals.aliases).toContain("breakfast"); // 自身关键词保留
+  });
+
+  it("zh 恢复分类的关键词并入英文名+英文关键词（反向同理）", () => {
+    const sleep = defaultCategoriesForRestore("zh").find((c) => c.id === "sleep")!;
+    expect(sleep.name).toBe("睡眠");
+    expect(sleep.aliases).toContain("Sleep");
+    expect(sleep.aliases).toContain("nap");
+    expect(sleep.aliases).toContain("睡觉");
+  });
+
+  it("忽略大小写去重，不产生重复关键词", () => {
+    for (const c of defaultCategoriesForRestore("en")) {
+      const lower = c.aliases.map((a) => a.trim().toLowerCase());
+      expect(new Set(lower).size).toBe(lower.length);
+    }
+  });
+
+  it("不带桥接的 defaultCategoriesFor 保持干净（全新安装不受影响）", () => {
+    const meals = defaultCategoriesFor("en").find((c) => c.id === "meal")!;
+    expect(meals.aliases).not.toContain("饮食");
   });
 });
