@@ -63,13 +63,13 @@ export class SegmentEditorModal extends Modal {
     const buttons = contentEl.createDiv({ cls: "tr-form-buttons" });
     if (this.mode.kind === "edit") {
       const delBtn = buttons.createEl("button", { text: "删除", cls: "mod-warning" });
-      delBtn.addEventListener("click", () => this.handleDelete());
+      delBtn.addEventListener("click", () => void this.handleDelete());
     }
     const cancel = buttons.createEl("button", { text: "取消" });
     cancel.addEventListener("click", () => this.close());
 
     const saveBtn = buttons.createEl("button", { text: "保存", cls: "mod-cta" });
-    saveBtn.addEventListener("click", () => this.handleSave());
+    saveBtn.addEventListener("click", () => void this.handleSave());
   }
 
   private async handleSave() {

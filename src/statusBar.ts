@@ -18,14 +18,14 @@ export class StatusIndicator {
   attachStatusBar(): void {
     this.statusEl = this.plugin.addStatusBarItem();
     this.statusEl.addClass("tr-status");
-    this.refresh();
-    this.intervalId = window.setInterval(() => this.refresh(), 30_000);
+    void this.refresh();
+    this.intervalId = window.setInterval(() => void this.refresh(), 30_000);
     this.plugin.registerInterval(this.intervalId);
   }
 
   attachRibbon(ribbon: HTMLElement): void {
     this.ribbonEl = ribbon;
-    this.refresh();
+    void this.refresh();
   }
 
   async refresh(): Promise<void> {

@@ -36,7 +36,7 @@ export class GridModal extends Modal {
     const cats = this.settings.categories;
 
     for (const cat of cats) {
-      this.renderCell(grid, cat, cat.emoji, cat.name, () => this.handlePunch(cat.name));
+      this.renderCell(grid, cat, cat.emoji, cat.name, () => void this.handlePunch(cat.name));
     }
 
     // Custom activity cell ✏️
@@ -48,19 +48,13 @@ export class GridModal extends Modal {
     // Footer
     const footer = contentEl.createDiv({ cls: "tr-grid-footer" });
     const undoBtn = footer.createEl("button", { text: "↶ 撤销" });
-    undoBtn.addEventListener("click", async () => {
-      const ok = await undoLast(this.recordsFile, this.undoStack);
-      if (ok) new Notice("已撤销 ✅");
-      else new Notice("没有可撤销的操作");
-      this.close();
-      this.onPunched?.();
-    });
+    undoBtn.addEventListener("click", () => void this.handleUndo());
     if (this.undoStack.size() === 0) undoBtn.setAttribute("disabled", "true");
 
     const openTodayBtn = footer.createEl("button", { text: "📄 今日" });
-    openTodayBtn.addEventListener("click", async () => {
+    openTodayBtn.addEventListener("click", () => {
       this.close();
-      await openTodayFile(this.app, this.recordsFile);
+      void openTodayFile(this.app, this.recordsFile);
     });
 
     const openSummaryBtn = footer.createEl("button", { text: "📊 汇总" });
@@ -112,6 +106,14 @@ export class GridModal extends Modal {
     cell.createDiv({ cls: "tr-cell-emoji", text: emoji });
     cell.createDiv({ cls: "tr-cell-label", text: label });
     cell.addEventListener("click", onClick);
+  }
+
+  private async handleUndo() {
+    const ok = await undoLast(this.recordsFile, this.undoStack);
+    if (ok) new Notice("已撤销 ✅");
+    else new Notice("没有可撤销的操作");
+    this.close();
+    this.onPunched?.();
   }
 
   private async handlePunch(activity: string) {

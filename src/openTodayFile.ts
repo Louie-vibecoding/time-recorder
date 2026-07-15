@@ -38,5 +38,5 @@ export function showPunchSuccessNotice(
 ): void {
   const notice = new Notice(`✅ ${activity} ${now} 起（点这里打开今日记录）`, SUCCESS_NOTICE_DURATION_MS);
   notice.noticeEl.addClass("tr-clickable-notice");
-  notice.noticeEl.addEventListener("click", () => openTodayFile(app, recordsFile));
+  notice.noticeEl.addEventListener("click", () => void openTodayFile(app, recordsFile));
 }

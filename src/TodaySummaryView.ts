@@ -72,11 +72,11 @@ export class TodaySummaryView extends ItemView {
     const mk = (label: string, p: Period) => {
       const btn = tabs.createEl("button", { text: label });
       if (this.period === p) btn.addClass("mod-cta");
-      btn.addEventListener("click", async () => {
+      btn.addEventListener("click", () => {
         if (this.period !== p) {
           this.period = p;
           this.anchor = getTodayDateString();
-          await this.refresh();
+          void this.refresh();
         }
       });
     };
@@ -96,19 +96,19 @@ export class TodaySummaryView extends ItemView {
     // 导航：‹ 昨天 | 今天 | 明天 ›（镜像本周/本月）
     const nav = container.createDiv({ cls: "tr-summary-nav" });
     const prevBtn = nav.createEl("button", { text: "‹ 昨天" });
-    prevBtn.addEventListener("click", async () => {
+    prevBtn.addEventListener("click", () => {
       this.anchor = addDays(anchor, -1);
-      await this.refresh();
+      void this.refresh();
     });
     const curBtn = nav.createEl("button", { text: "今天" });
-    curBtn.addEventListener("click", async () => {
+    curBtn.addEventListener("click", () => {
       this.anchor = getTodayDateString();
-      await this.refresh();
+      void this.refresh();
     });
     const nextBtn = nav.createEl("button", { text: "明天 ›" });
-    nextBtn.addEventListener("click", async () => {
+    nextBtn.addEventListener("click", () => {
       this.anchor = addDays(anchor, 1);
-      await this.refresh();
+      void this.refresh();
     });
 
     const rel = relativeDayLabel(anchor, today);
@@ -123,8 +123,8 @@ export class TodaySummaryView extends ItemView {
 
     const footer = container.createDiv({ cls: "tr-summary-footer" });
     const copyBtn = footer.createEl("button", { text: "📋 复制汇总文本" });
-    copyBtn.addEventListener("click", async () => {
-      await this.copyText(formatSummaryAsMarkdown(day, summary, this.settings.categories));
+    copyBtn.addEventListener("click", () => {
+      void this.copyText(formatSummaryAsMarkdown(day, summary, this.settings.categories));
     });
   }
 
@@ -145,19 +145,19 @@ export class TodaySummaryView extends ItemView {
     // 导航
     const nav = container.createDiv({ cls: "tr-summary-nav" });
     const prevBtn = nav.createEl("button", { text: this.period === "week" ? "‹ 上一周" : "‹ 上月" });
-    prevBtn.addEventListener("click", async () => {
+    prevBtn.addEventListener("click", () => {
       this.anchor = addDays(range.start, -1);
-      await this.refresh();
+      void this.refresh();
     });
     const curBtn = nav.createEl("button", { text: label });
-    curBtn.addEventListener("click", async () => {
+    curBtn.addEventListener("click", () => {
       this.anchor = getTodayDateString();
-      await this.refresh();
+      void this.refresh();
     });
     const nextBtn = nav.createEl("button", { text: this.period === "week" ? "下一周 ›" : "下月 ›" });
-    nextBtn.addEventListener("click", async () => {
+    nextBtn.addEventListener("click", () => {
       this.anchor = addDays(range.end, 1);
-      await this.refresh();
+      void this.refresh();
     });
 
     // 头部
@@ -176,8 +176,8 @@ export class TodaySummaryView extends ItemView {
 
     const footer = container.createDiv({ cls: "tr-summary-footer" });
     const copyBtn = footer.createEl("button", { text: "📋 复制汇总文本" });
-    copyBtn.addEventListener("click", async () => {
-      await this.copyText(formatPeriodSummaryAsMarkdown(`${label} ${range.start} ~ ${range.end}`, summary));
+    copyBtn.addEventListener("click", () => {
+      void this.copyText(formatPeriodSummaryAsMarkdown(`${label} ${range.start} ~ ${range.end}`, summary));
     });
   }
 

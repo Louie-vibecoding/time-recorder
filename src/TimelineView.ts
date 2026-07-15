@@ -64,23 +64,23 @@ export class TimelineView extends ItemView {
     const header = this.container.createDiv({ cls: "tr-timeline-header" });
 
     const prevBtn = header.createEl("button", { text: "< 昨天" });
-    prevBtn.addEventListener("click", async () => {
+    prevBtn.addEventListener("click", () => {
       this.currentDate = addDays(this.currentDate, -1);
-      await this.render();
+      void this.render();
     });
 
     header.createDiv({ cls: "tr-timeline-title", text: this.currentDate });
 
     const nextBtn = header.createEl("button", { text: "明天 >" });
-    nextBtn.addEventListener("click", async () => {
+    nextBtn.addEventListener("click", () => {
       this.currentDate = addDays(this.currentDate, 1);
-      await this.render();
+      void this.render();
     });
 
     const todayBtn = header.createEl("button", { text: "今天" });
-    todayBtn.addEventListener("click", async () => {
+    todayBtn.addEventListener("click", () => {
       this.currentDate = getTodayDateString();
-      await this.render();
+      void this.render();
     });
 
     // Timeline body
@@ -246,7 +246,7 @@ export class TimelineView extends ItemView {
         paint(newStart, newEnd);
       };
 
-      const onUp = async (ev: MouseEvent) => {
+      const onUpAsync = async (ev: MouseEvent) => {
         window.removeEventListener("mousemove", onMove);
         window.removeEventListener("mouseup", onUp);
         const { newStart, newEnd } = compute(ev.clientY);
@@ -269,6 +269,8 @@ export class TimelineView extends ItemView {
         if (this.onDataChanged) this.onDataChanged();
         else void this.render();
       };
+      // 同一引用注册/注销：包一层同步 handler，把 async 逻辑显式 void 掉
+      const onUp = (ev: MouseEvent) => void onUpAsync(ev);
 
       window.addEventListener("mousemove", onMove);
       window.addEventListener("mouseup", onUp);

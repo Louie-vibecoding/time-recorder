@@ -31,7 +31,6 @@ export class TimeRecorderSettingsTab extends PluginSettingTab {
   display(): void {
     const { containerEl } = this;
     containerEl.empty();
-    containerEl.createEl("h2", { text: "Time Recorder 设置 / Settings" });
 
     // ---------- 路径区 ----------
     new Setting(containerEl)
@@ -61,7 +60,7 @@ export class TimeRecorderSettingsTab extends PluginSettingTab {
       );
 
     // ---------- 分类区 ----------
-    containerEl.createEl("h3", { text: "分类 / Categories" });
+    new Setting(containerEl).setName("分类 / Categories").setHeading();
     const hint = containerEl.createEl("p", {
       text: "活动名自动按「名字 / 关键词」归类。关键词用逗号分隔。改名 / 换 emoji / 删类都不会改动历史记录。",
     });

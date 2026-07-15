@@ -49,12 +49,12 @@ export default class TimeRecorderPlugin extends Plugin {
 
     // Ribbon icon for summary view (mobile entry independent of bottom toolbar)
     this.addRibbonIcon("pie-chart", "Time Recorder: Summary", () => {
-      this.activateSummaryView();
+      void this.activateSummaryView();
     });
 
     // Ribbon icon for timeline back-fill (mobile entry independent of bottom toolbar)
     this.addRibbonIcon("gantt-chart", "Time Recorder: Open timeline back-fill", () => {
-      this.activateTimelineView();
+      void this.activateTimelineView();
     });
 
     // Status bar
@@ -77,7 +77,7 @@ export default class TimeRecorderPlugin extends Plugin {
 
     this.registerView(
       VIEW_TYPE_TIMELINE,
-      (leaf) => new TimelineView(leaf, this.settings, this.recordsFile, () => this.refreshAll()),
+      (leaf) => new TimelineView(leaf, this.settings, this.recordsFile, () => void this.refreshAll()),
     );
 
     // Single file-watch handler for both status + summary
@@ -91,13 +91,13 @@ export default class TimeRecorderPlugin extends Plugin {
     this.addCommand({
       id: "open-today-summary",
       name: "Open summary",
-      callback: () => this.activateSummaryView(),
+      callback: () => void this.activateSummaryView(),
     });
 
     this.addCommand({
       id: "open-timeline",
       name: "Open timeline back-fill",
-      callback: () => this.activateTimelineView(),
+      callback: () => void this.activateTimelineView(),
     });
   }
 
@@ -145,7 +145,7 @@ export default class TimeRecorderPlugin extends Plugin {
       leaf = workspace.getRightLeaf(false) ?? workspace.getLeaf(true);
       await leaf.setViewState({ type: VIEW_TYPE_TODAY_SUMMARY, active: true });
     }
-    workspace.revealLeaf(leaf);
+    await workspace.revealLeaf(leaf);
     // Refresh（instanceof 守卫：deferred 视图的 view 可能尚未实例化）
     if (leaf.view instanceof TodaySummaryView) {
       await leaf.view.refresh();
@@ -159,7 +159,7 @@ export default class TimeRecorderPlugin extends Plugin {
       leaf = workspace.getLeaf(true);
       await leaf.setViewState({ type: VIEW_TYPE_TIMELINE, active: true });
     }
-    workspace.revealLeaf(leaf);
+    await workspace.revealLeaf(leaf);
   }
 
   openGridModal() {
@@ -168,10 +168,10 @@ export default class TimeRecorderPlugin extends Plugin {
       this.settings,
       this.recordsFile,
       this.undoStack,
-      () => this.refreshAll(),
+      () => void this.refreshAll(),
       () => this.openCustomActivityModal(),
-      () => this.activateSummaryView(),
-      () => this.activateTimelineView(),
+      () => void this.activateSummaryView(),
+      () => void this.activateTimelineView(),
     ).open();
   }
 
@@ -181,7 +181,7 @@ export default class TimeRecorderPlugin extends Plugin {
       this.settings,
       this.recordsFile,
       this.undoStack,
-      () => this.refreshAll(),
+      () => void this.refreshAll(),
     ).open();
   }
 
@@ -190,7 +190,7 @@ export default class TimeRecorderPlugin extends Plugin {
     let loadFailed = false;
     try {
       loaded = await this.loadData();
-    } catch (e) {
+    } catch {
       // data.json 存在但 JSON 解析失败。
       loadFailed = true;
     }
@@ -217,7 +217,7 @@ export default class TimeRecorderPlugin extends Plugin {
         const raw = await adapter.read(dataPath);
         await adapter.write(bakPath, raw);
       }
-    } catch (e) {
+    } catch {
       // 备份失败也不影响插件正常加载（默认设置已就位）。
     }
   }

@@ -35,7 +35,7 @@ export class CustomActivityModal extends Modal {
       placeholder: "例如：写时间记录仪插件",
     });
     input.addEventListener("input", () => (this.activity = input.value));
-    setTimeout(() => input.focus(), 50);
+    window.setTimeout(() => input.focus(), 50);
 
     // Buttons
     const buttons = contentEl.createDiv({ cls: "tr-form-buttons" });
@@ -43,10 +43,10 @@ export class CustomActivityModal extends Modal {
     cancel.addEventListener("click", () => this.close());
 
     const submit = buttons.createEl("button", { text: "确定打卡", cls: "mod-cta" });
-    submit.addEventListener("click", () => this.handleSubmit());
+    submit.addEventListener("click", () => void this.handleSubmit());
 
     input.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") this.handleSubmit();
+      if (e.key === "Enter") void this.handleSubmit();
     });
   }
 

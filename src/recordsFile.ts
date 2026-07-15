@@ -1,3 +1,4 @@
+import type { App } from "obsidian";
 import { DayRecord, TimeRecorderSettings } from "./types";
 import { parseDayContent } from "./parser";
 import { getDateFilename } from "./date";
@@ -67,7 +68,7 @@ export class RecordsFileManager {
 }
 
 /** Adapter that wraps Obsidian's real Vault API. Used in main.ts. */
-export function createObsidianVaultAdapter(app: any): VaultLike {
+export function createObsidianVaultAdapter(app: App): VaultLike {
   return {
     async exists(path: string) {
       return await app.vault.adapter.exists(path);
