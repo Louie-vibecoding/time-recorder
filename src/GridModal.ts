@@ -7,6 +7,7 @@ import { nowHHMM, minutesDiff, formatDuration, isOpenEnd } from "./time";
 import { getTodayDateString } from "./date";
 import { openTodayFile, showPunchSuccessNotice } from "./openTodayFile";
 import { segmentColor } from "./segmentColor";
+import { t, format } from "./i18n";
 
 export class GridModal extends Modal {
   constructor(
@@ -40,36 +41,36 @@ export class GridModal extends Modal {
     }
 
     // Custom activity cell ✏️
-    this.renderCell(grid, null, "✏️", "自定义…", () => {
+    this.renderCell(grid, null, "✏️", t("cellCustom"), () => {
       this.close();
       this.openCustomActivity?.();
     });
 
     // Footer
     const footer = contentEl.createDiv({ cls: "tr-grid-footer" });
-    const undoBtn = footer.createEl("button", { text: "↶ 撤销" });
+    const undoBtn = footer.createEl("button", { text: t("btnUndo") });
     undoBtn.addEventListener("click", () => void this.handleUndo());
     if (this.undoStack.size() === 0) undoBtn.setAttribute("disabled", "true");
 
-    const openTodayBtn = footer.createEl("button", { text: "📄 今日" });
+    const openTodayBtn = footer.createEl("button", { text: t("btnToday") });
     openTodayBtn.addEventListener("click", () => {
       this.close();
       void openTodayFile(this.app, this.recordsFile);
     });
 
-    const openSummaryBtn = footer.createEl("button", { text: "📊 汇总" });
+    const openSummaryBtn = footer.createEl("button", { text: t("btnSummary") });
     openSummaryBtn.addEventListener("click", () => {
       this.close();
       this.openSummary?.();
     });
 
-    const openTimelineBtn = footer.createEl("button", { text: "📅 时间轴" });
+    const openTimelineBtn = footer.createEl("button", { text: t("btnTimeline") });
     openTimelineBtn.addEventListener("click", () => {
       this.close();
       this.openTimeline?.();
     });
 
-    const closeBtn = footer.createEl("button", { text: "✕ 关闭" });
+    const closeBtn = footer.createEl("button", { text: t("btnClose") });
     closeBtn.addEventListener("click", () => this.close());
   }
 
@@ -82,9 +83,14 @@ export class GridModal extends Modal {
       const cat = this.settings.categories.find(c => c.id === open.categoryId);
       const emoji = cat ? cat.emoji : "❓";
       const duration = minutesDiff(open.start, nowHHMM());
-      header.setText(`现在在做：${emoji} ${open.activity}（${open.start} 起 ${formatDuration(duration)}）`);
+      header.setText(format(t("nowDoing"), {
+        emoji,
+        activity: open.activity,
+        start: open.start,
+        dur: formatDuration(duration),
+      }));
     } else {
-      header.setText("尚未开始任何活动");
+      header.setText(t("notStarted"));
     }
   }
 
@@ -110,8 +116,8 @@ export class GridModal extends Modal {
 
   private async handleUndo() {
     const ok = await undoLast(this.recordsFile, this.undoStack);
-    if (ok) new Notice("已撤销 ✅");
-    else new Notice("没有可撤销的操作");
+    if (ok) new Notice(t("undone"));
+    else new Notice(t("nothingToUndo"));
     this.close();
     this.onPunched?.();
   }
@@ -129,7 +135,7 @@ export class GridModal extends Modal {
       this.close();
       this.onPunched?.();
     } catch (err) {
-      new Notice(`打卡失败：${(err as Error).message}`);
+      new Notice(t("punchFailed") + (err as Error).message);
       console.error("Punch-in failed", err);
     }
   }

@@ -3,6 +3,7 @@ import { RecordsFileManager } from "./recordsFile";
 import { TimeRecorderSettings } from "./types";
 import { nowHHMM, minutesDiff, formatDuration, isOpenEnd } from "./time";
 import { getTodayDateString } from "./date";
+import { t } from "./i18n";
 
 export class StatusIndicator {
   private statusEl?: HTMLElement;
@@ -32,7 +33,7 @@ export class StatusIndicator {
     const today = getTodayDateString();
     const day = await this.recordsFile.readDayRecord(today).catch(() => null);
     const open = day?.segments.find(s => isOpenEnd(s.end));
-    let text = "⏱ 未开始";
+    let text = t("statusIdle");
     if (open) {
       const cat = this.settings.categories.find(c => c.id === open.categoryId);
       const emoji = cat?.emoji ?? "❓";

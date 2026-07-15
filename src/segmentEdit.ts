@@ -12,13 +12,27 @@ export interface SegmentTimesValidation {
   normalizedEnd?: string; // 校验通过时最终写入的 end（"ing" 或有效 "HH:MM"）
 }
 
+export interface SegmentTimeMessages {
+  startInvalid: string;
+  endInvalid: string;
+  endNotAfterStart: string;
+}
+
+/** 默认（中文）校验文案，也是 i18n zh 的单一来源。 */
+export const ZH_SEGMENT_TIME_MESSAGES: SegmentTimeMessages = {
+  startInvalid: "开始时间无效",
+  endInvalid: "结束时间无效",
+  endNotAfterStart: "结束时间必须晚于开始时间",
+};
+
 export function validateSegmentTimes(
   start: string,
   end: string,
+  msgs: SegmentTimeMessages = ZH_SEGMENT_TIME_MESSAGES,
 ): SegmentTimesValidation {
   const startMin = parseHHMM(start);
   if (isNaN(startMin)) {
-    return { ok: false, error: "开始时间无效" };
+    return { ok: false, error: msgs.startInvalid };
   }
 
   const endRaw = end.trim();
@@ -29,10 +43,10 @@ export function validateSegmentTimes(
 
   const endMin = parseHHMM(endRaw);
   if (isNaN(endMin)) {
-    return { ok: false, error: "结束时间无效" };
+    return { ok: false, error: msgs.endInvalid };
   }
   if (endMin <= startMin) {
-    return { ok: false, error: "结束时间必须晚于开始时间" };
+    return { ok: false, error: msgs.endNotAfterStart };
   }
   return { ok: true, normalizedEnd: endRaw };
 }

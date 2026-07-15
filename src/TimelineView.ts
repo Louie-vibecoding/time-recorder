@@ -7,6 +7,7 @@ import { formatSegmentLine, replaceLine } from "./parser";
 import { SegmentEditorModal } from "./SegmentEditorModal";
 import { segmentColor } from "./segmentColor";
 import { serialize } from "./serialize";
+import { t } from "./i18n";
 import {
   halfHourGridTicks,
   emptySlotFill,
@@ -63,7 +64,7 @@ export class TimelineView extends ItemView {
     // Header: date navigation（昨天 / 标题 / 明天 / 今天）
     const header = this.container.createDiv({ cls: "tr-timeline-header" });
 
-    const prevBtn = header.createEl("button", { text: "< 昨天" });
+    const prevBtn = header.createEl("button", { text: t("tlPrev") });
     prevBtn.addEventListener("click", () => {
       this.currentDate = addDays(this.currentDate, -1);
       void this.render();
@@ -71,13 +72,13 @@ export class TimelineView extends ItemView {
 
     header.createDiv({ cls: "tr-timeline-title", text: this.currentDate });
 
-    const nextBtn = header.createEl("button", { text: "明天 >" });
+    const nextBtn = header.createEl("button", { text: t("tlNext") });
     nextBtn.addEventListener("click", () => {
       this.currentDate = addDays(this.currentDate, 1);
       void this.render();
     });
 
-    const todayBtn = header.createEl("button", { text: "今天" });
+    const todayBtn = header.createEl("button", { text: t("tlToday") });
     todayBtn.addEventListener("click", () => {
       this.currentDate = getTodayDateString();
       void this.render();
@@ -263,7 +264,7 @@ export class TimelineView extends ItemView {
           await this.recordsFile.writeDayContent(this.currentDate, after);
         } catch (err) {
           console.error("Time Recorder: failed to save dragged segment", err);
-          new Notice(`保存失败：${(err as Error).message}`);
+          new Notice(t("saveFailed") + (err as Error).message);
           return; // 失败不刷新，避免 UI 抖回误导
         }
         if (this.onDataChanged) this.onDataChanged();

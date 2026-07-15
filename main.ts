@@ -11,6 +11,8 @@ import { TimelineView, VIEW_TYPE_TIMELINE } from "./src/TimelineView";
 import { getTodayDateString } from "./src/date";
 import { TimeRecorderSettingsTab } from "./src/SettingsTab";
 import { splitDuplicateLeaves } from "./src/leafDedup";
+import { getLang, t } from "./src/i18n";
+import { defaultSettingsFor } from "./src/settings";
 
 export default class TimeRecorderPlugin extends Plugin {
   settings!: TimeRecorderSettings;
@@ -196,10 +198,15 @@ export default class TimeRecorderPlugin extends Plugin {
     }
     const { settings, recovered } = migrateSettings(loaded);
     this.settings = settings;
+    // 全新安装（无 data.json）且界面为英文 → 用英文默认（分类名/关键词/文件夹）。
+    // 已有 data.json 的用户（含部分恢复）永不改写，避免动到用户数据。
+    if (loaded === null && getLang() === "en") {
+      this.settings = defaultSettingsFor("en");
+    }
     if (recovered || loadFailed) {
       await this.backupCorruptSettings();
       new Notice(
-        "⏱️ 时间记录仪：你的设置文件好像出了点小问题，已经先用默认设置顶上了。原来的设置我自动留了备份、没丢，需要的话能帮你找回。",
+        t("corruptSettings"),
         0, // 0 = 常驻直到点击关闭，确保用户看到
       );
     }

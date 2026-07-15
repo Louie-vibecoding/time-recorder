@@ -1,6 +1,7 @@
 import { App, Notice, TFile } from "obsidian";
 import { RecordsFileManager } from "./recordsFile";
 import { getTodayDateString } from "./date";
+import { t, format } from "./i18n";
 
 /**
  * Open today's time-record .md. If it doesn't exist, create an empty file
@@ -22,7 +23,7 @@ export async function openTodayFile(app: App, recordsFile: RecordsFileManager): 
       await app.workspace.openLinkText(path, "", false);
     }
   } catch (err) {
-    new Notice(`打开今日记录失败：${(err as Error).message}`);
+    new Notice(t("openTodayFailed") + (err as Error).message);
     console.error("Open today file failed", err);
   }
 }
@@ -36,7 +37,7 @@ export function showPunchSuccessNotice(
   activity: string,
   now: string,
 ): void {
-  const notice = new Notice(`✅ ${activity} ${now} 起（点这里打开今日记录）`, SUCCESS_NOTICE_DURATION_MS);
+  const notice = new Notice(format(t("punchSuccess"), { activity, now }), SUCCESS_NOTICE_DURATION_MS);
   notice.noticeEl.addClass("tr-clickable-notice");
   notice.noticeEl.addEventListener("click", () => void openTodayFile(app, recordsFile));
 }

@@ -34,10 +34,27 @@ export function dayViewEffectiveNow(anchor: string, today: string, now: string):
   return anchor === today ? now : "24:00";
 }
 
-/** 相对日标签：今天 / 昨天 / 明天 / ""（其余日期）。 */
-export function relativeDayLabel(anchor: string, today: string): string {
-  if (anchor === today) return "今天";
-  if (anchor === addDays(today, -1)) return "昨天";
-  if (anchor === addDays(today, 1)) return "明天";
+export interface RelDayLabels {
+  today: string;
+  yesterday: string;
+  tomorrow: string;
+}
+
+/** 默认（中文）相对日标签，也是 i18n zh 的单一来源。 */
+export const REL_DAY_LABELS: RelDayLabels = {
+  today: "今天",
+  yesterday: "昨天",
+  tomorrow: "明天",
+};
+
+/** 相对日标签：今天 / 昨天 / 明天 / ""（其余日期）。文案可注入（i18n）。 */
+export function relativeDayLabel(
+  anchor: string,
+  today: string,
+  labels: RelDayLabels = REL_DAY_LABELS,
+): string {
+  if (anchor === today) return labels.today;
+  if (anchor === addDays(today, -1)) return labels.yesterday;
+  if (anchor === addDays(today, 1)) return labels.tomorrow;
   return "";
 }

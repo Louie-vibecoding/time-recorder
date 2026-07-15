@@ -26,3 +26,43 @@ export const DEFAULT_SETTINGS: TimeRecorderSettings = {
   templatePath: "反省日志/时间记录/timer template.md",
   categories: DEFAULT_CATEGORIES,
 };
+
+/**
+ * 英文默认分类：id 与中文默认一一对应（颜色映射 / 已有记录的归类保持稳定），
+ * 仅名称与关键词本地化。只影响「全新安装且界面为英文」的首次初始化。
+ */
+export const DEFAULT_CATEGORIES_EN: Category[] = [
+  { id: "sleep",   name: "Sleep",    emoji: "😴", aliases: ["nap"] },
+  { id: "study",   name: "Study",    emoji: "📚", aliases: ["reading", "class", "review"] },
+  { id: "meal",    name: "Meals",    emoji: "🍱", aliases: ["breakfast", "lunch", "dinner", "eat", "food", "takeout"] },
+  { id: "hygiene", name: "Hygiene",  emoji: "🚿", aliases: ["shower", "wash", "toilet", "teeth"] },
+  { id: "commute", name: "Commute",  emoji: "🚗", aliases: ["subway", "bus", "taxi", "drive"] },
+  { id: "social",  name: "Social",   emoji: "💬", aliases: ["chat", "call", "phone", "friends"] },
+  { id: "chores",  name: "Chores",   emoji: "🧹", aliases: ["cleaning", "laundry", "tidy"] },
+  { id: "work",    name: "Work",     emoji: "💼", aliases: ["meeting", "overtime", "office"] },
+  { id: "sport",   name: "Exercise", emoji: "🏃", aliases: ["run", "gym", "workout"] },
+  { id: "fun",     name: "Fun",      emoji: "🎮", aliases: ["game", "gaming", "video", "tv"] },
+];
+
+/** 按语言取默认分类（深拷贝，调用方可安全修改）。 */
+export function defaultCategoriesFor(lang: "zh" | "en"): Category[] {
+  const src = lang === "zh" ? DEFAULT_CATEGORIES : DEFAULT_CATEGORIES_EN;
+  return src.map((c) => ({ ...c, aliases: [...c.aliases] }));
+}
+
+/**
+ * 按语言取整套默认设置（深拷贝）。
+ * 注意：记录文件名格式（"YYYY-M-D 时间记录.md"）是数据层约定，所有语言统一，
+ * 不在此处本地化——否则切换界面语言会导致旧记录文件读不到。
+ */
+export function defaultSettingsFor(lang: "zh" | "en"): TimeRecorderSettings {
+  if (lang === "zh") {
+    return { ...DEFAULT_SETTINGS, categories: defaultCategoriesFor("zh") };
+  }
+  return {
+    version: DEFAULT_SETTINGS.version,
+    recordsFolder: "Time Records",
+    templatePath: "Time Records/timer template.md",
+    categories: defaultCategoriesFor("en"),
+  };
+}

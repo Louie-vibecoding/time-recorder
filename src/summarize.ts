@@ -60,18 +60,38 @@ export function summarizeDay(day: DayRecord, categories: Category[], now: string
   };
 }
 
-export function formatSummaryAsMarkdown(day: DayRecord, summary: DaySummary, _categories: Category[]): string {
+export interface MarkdownStrings {
+  headingTpl: string; // 含 {title} 占位
+  tableHeader: string;
+  unrecordedLabel: string;
+  totalLabel: string;
+}
+
+/** 默认（中文）Markdown 导出文案，也是 i18n zh 的单一来源。 */
+export const ZH_MARKDOWN_STRINGS: MarkdownStrings = {
+  headingTpl: "## 时间总结（{title}）",
+  tableHeader: "| 排名 | 类别 | 时长 | 占比 | 包含活动 |",
+  unrecordedLabel: "⚪ 未记录",
+  totalLabel: "合计",
+};
+
+export function formatSummaryAsMarkdown(
+  day: DayRecord,
+  summary: DaySummary,
+  _categories: Category[],
+  s: MarkdownStrings = ZH_MARKDOWN_STRINGS,
+): string {
   const lines: string[] = [];
-  lines.push(`## 时间总结（${day.date}）`);
+  lines.push(s.headingTpl.replace("{title}", day.date));
   lines.push("");
-  lines.push("| 排名 | 类别 | 时长 | 占比 | 包含活动 |");
+  lines.push(s.tableHeader);
   lines.push("|---|---|---|---|---|");
   summary.byCategory.forEach((b, i) => {
     const acts = b.activities.join(" / ");
     lines.push(`| ${i + 1} | ${b.emoji} ${b.name} | **${formatDuration(b.minutes)}** | ${b.percent.toFixed(1)}% | ${acts} |`);
   });
-  lines.push(`| - | ⚪ 未记录 | ${formatDuration(summary.unrecordedMinutes)} | ${summary.unrecordedPercent.toFixed(1)}% | |`);
-  lines.push("| | **合计** | **24h** | 100% | |");
+  lines.push(`| - | ${s.unrecordedLabel} | ${formatDuration(summary.unrecordedMinutes)} | ${summary.unrecordedPercent.toFixed(1)}% | |`);
+  lines.push(`| | **${s.totalLabel}** | **24h** | 100% | |`);
   return lines.join("\n");
 }
 
@@ -133,17 +153,21 @@ export function summarizePeriod(
   };
 }
 
-export function formatPeriodSummaryAsMarkdown(title: string, summary: PeriodSummary): string {
+export function formatPeriodSummaryAsMarkdown(
+  title: string,
+  summary: PeriodSummary,
+  s: MarkdownStrings = ZH_MARKDOWN_STRINGS,
+): string {
   const lines: string[] = [];
-  lines.push(`## 时间总结（${title}）`);
+  lines.push(s.headingTpl.replace("{title}", title));
   lines.push("");
-  lines.push("| 排名 | 类别 | 时长 | 占比 | 包含活动 |");
+  lines.push(s.tableHeader);
   lines.push("|---|---|---|---|---|");
   summary.byCategory.forEach((b, i) => {
     const acts = b.activities.join(" / ");
     lines.push(`| ${i + 1} | ${b.emoji} ${b.name} | **${formatDuration(b.minutes)}** | ${b.percent.toFixed(1)}% | ${acts} |`);
   });
-  lines.push(`| - | ⚪ 未记录 | ${formatDuration(summary.unrecordedMinutes)} | ${summary.unrecordedPercent.toFixed(1)}% | |`);
-  lines.push(`| | **合计** | **${formatDuration(summary.denominatorMinutes)}** | 100% | |`);
+  lines.push(`| - | ${s.unrecordedLabel} | ${formatDuration(summary.unrecordedMinutes)} | ${summary.unrecordedPercent.toFixed(1)}% | |`);
+  lines.push(`| | **${s.totalLabel}** | **${formatDuration(summary.denominatorMinutes)}** | 100% | |`);
   return lines.join("\n");
 }

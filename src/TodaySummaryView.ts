@@ -13,6 +13,7 @@ import { getTodayDateString, addDays, dayViewEffectiveNow, relativeDayLabel } fr
 import { weekRange, monthRange, enumerateDates, elapsedInPeriod } from "./periodRange";
 import { segmentColor } from "./segmentColor";
 import { serialize } from "./serialize";
+import { t, format, mdStrings, relDayLabels } from "./i18n";
 
 export const VIEW_TYPE_TODAY_SUMMARY = "time-recorder-today-summary";
 
@@ -80,9 +81,9 @@ export class TodaySummaryView extends ItemView {
         }
       });
     };
-    mk("今天", "day");
-    mk("本周", "week");
-    mk("本月", "month");
+    mk(t("sumTabToday"), "day");
+    mk(t("sumTabWeek"), "week");
+    mk(t("sumTabMonth"), "month");
   }
 
   private async renderDay(container: HTMLElement) {
@@ -95,36 +96,37 @@ export class TodaySummaryView extends ItemView {
 
     // 导航：‹ 昨天 | 今天 | 明天 ›（镜像本周/本月）
     const nav = container.createDiv({ cls: "tr-summary-nav" });
-    const prevBtn = nav.createEl("button", { text: "‹ 昨天" });
+    const prevBtn = nav.createEl("button", { text: t("sumPrevDay") });
     prevBtn.addEventListener("click", () => {
       this.anchor = addDays(anchor, -1);
       void this.refresh();
     });
-    const curBtn = nav.createEl("button", { text: "今天" });
+    const curBtn = nav.createEl("button", { text: t("sumTodayBtn") });
     curBtn.addEventListener("click", () => {
       this.anchor = getTodayDateString();
       void this.refresh();
     });
-    const nextBtn = nav.createEl("button", { text: "明天 ›" });
+    const nextBtn = nav.createEl("button", { text: t("sumNextDay") });
     nextBtn.addEventListener("click", () => {
       this.anchor = addDays(anchor, 1);
       void this.refresh();
     });
 
-    const rel = relativeDayLabel(anchor, today);
+    const rel = relativeDayLabel(anchor, today, relDayLabels());
     const header = container.createDiv({ cls: "tr-summary-header" });
     header.createEl("h3", { text: `📅 ${rel ? rel + " " : ""}${anchor}` });
     const sub = header.createEl("div", { cls: "tr-summary-sub" });
-    sub.setText(
-      `已记录 ${formatDuration(summary.totalRecordedMinutes)} / 24h（${(100 - summary.unrecordedPercent).toFixed(0)}%）`,
-    );
+    sub.setText(format(t("sumRecorded24"), {
+      dur: formatDuration(summary.totalRecordedMinutes),
+      pct: (100 - summary.unrecordedPercent).toFixed(0),
+    }));
 
     this.renderTable(container, summary.byCategory, summary.unrecordedMinutes, summary.unrecordedPercent);
 
     const footer = container.createDiv({ cls: "tr-summary-footer" });
-    const copyBtn = footer.createEl("button", { text: "📋 复制汇总文本" });
+    const copyBtn = footer.createEl("button", { text: t("copySummary") });
     copyBtn.addEventListener("click", () => {
-      void this.copyText(formatSummaryAsMarkdown(day, summary, this.settings.categories));
+      void this.copyText(formatSummaryAsMarkdown(day, summary, this.settings.categories, mdStrings()));
     });
   }
 
@@ -140,11 +142,11 @@ export class TodaySummaryView extends ItemView {
       now,
       denominatorMinutes: elapsedMinutes,
     });
-    const label = this.period === "week" ? "本周" : "本月";
+    const label = this.period === "week" ? t("weekLabel") : t("monthLabel");
 
     // 导航
     const nav = container.createDiv({ cls: "tr-summary-nav" });
-    const prevBtn = nav.createEl("button", { text: this.period === "week" ? "‹ 上一周" : "‹ 上月" });
+    const prevBtn = nav.createEl("button", { text: this.period === "week" ? t("prevWeek") : t("prevMonth") });
     prevBtn.addEventListener("click", () => {
       this.anchor = addDays(range.start, -1);
       void this.refresh();
@@ -154,7 +156,7 @@ export class TodaySummaryView extends ItemView {
       this.anchor = getTodayDateString();
       void this.refresh();
     });
-    const nextBtn = nav.createEl("button", { text: this.period === "week" ? "下一周 ›" : "下月 ›" });
+    const nextBtn = nav.createEl("button", { text: this.period === "week" ? t("nextWeek") : t("nextMonth") });
     nextBtn.addEventListener("click", () => {
       this.anchor = addDays(range.end, 1);
       void this.refresh();
@@ -165,19 +167,21 @@ export class TodaySummaryView extends ItemView {
     header.createEl("h3", { text: `📅 ${label} ${range.start} ~ ${range.end}` });
     const sub = header.createEl("div", { cls: "tr-summary-sub" });
     const recordedPct = elapsedMinutes > 0 ? (100 - summary.unrecordedPercent).toFixed(0) : "0";
-    sub.setText(
-      `已记录 ${formatDuration(summary.totalRecordedMinutes)} / 已过去 ${formatDuration(elapsedMinutes)}（${recordedPct}%）`,
-    );
+    sub.setText(format(t("sumRecordedElapsed"), {
+      dur: formatDuration(summary.totalRecordedMinutes),
+      elapsed: formatDuration(elapsedMinutes),
+      pct: recordedPct,
+    }));
     const avg = header.createEl("div", { cls: "tr-summary-sub" });
     const avgMin = elapsedDays > 0 ? Math.round(summary.totalRecordedMinutes / elapsedDays) : 0;
-    avg.setText(`日均 ${formatDuration(avgMin)}`);
+    avg.setText(format(t("dailyAvg"), { dur: formatDuration(avgMin) }));
 
     this.renderTable(container, summary.byCategory, summary.unrecordedMinutes, summary.unrecordedPercent);
 
     const footer = container.createDiv({ cls: "tr-summary-footer" });
-    const copyBtn = footer.createEl("button", { text: "📋 复制汇总文本" });
+    const copyBtn = footer.createEl("button", { text: t("copySummary") });
     copyBtn.addEventListener("click", () => {
-      void this.copyText(formatPeriodSummaryAsMarkdown(`${label} ${range.start} ~ ${range.end}`, summary));
+      void this.copyText(formatPeriodSummaryAsMarkdown(`${label} ${range.start} ~ ${range.end}`, summary, mdStrings()));
     });
   }
 
@@ -189,7 +193,7 @@ export class TodaySummaryView extends ItemView {
   ) {
     const table = container.createEl("table", { cls: "tr-summary-table" });
     const thead = table.createEl("thead").createEl("tr");
-    ["排", "类别", "时长", "占比"].forEach((t) => thead.createEl("th", { text: t }));
+    [t("thRank"), t("thCat"), t("thDur"), t("thPct")].forEach((th) => thead.createEl("th", { text: th }));
     const tbody = table.createEl("tbody");
 
     buckets.forEach((b, i) => {
@@ -208,7 +212,7 @@ export class TodaySummaryView extends ItemView {
 
     const unrec = tbody.createEl("tr", { cls: "tr-unrecorded-row" });
     unrec.createEl("td", { text: "" });
-    unrec.createEl("td", { text: "⚪ 未记录" });
+    unrec.createEl("td", { text: t("unrecordedRow") });
     unrec.createEl("td", { text: formatDuration(unrecMin) });
     unrec.createEl("td", { text: `${unrecPct.toFixed(1)}%` });
   }
@@ -224,9 +228,9 @@ export class TodaySummaryView extends ItemView {
   private async copyText(md: string) {
     try {
       await navigator.clipboard.writeText(md);
-      new Notice("已复制到剪贴板 ✅");
+      new Notice(t("copied"));
     } catch (err) {
-      new Notice(`复制失败：${(err as Error).message}`);
+      new Notice(t("copyFailed") + (err as Error).message);
     }
   }
 }

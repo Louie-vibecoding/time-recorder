@@ -4,6 +4,7 @@ import { RecordsFileManager } from "./recordsFile";
 import { formatSegmentLine, replaceLine, appendLine } from "./parser";
 import { inferCategoryId } from "./categoryInfer";
 import { validateSegmentTimes } from "./segmentEdit";
+import { t, segmentTimeMessages } from "./i18n";
 
 export type EditorMode =
   | { kind: "new"; start: string; end: string }
@@ -40,48 +41,48 @@ export class SegmentEditorModal extends Modal {
     contentEl.addClass("tr-editor-modal");
 
     contentEl.createEl("h2", {
-      text: this.mode.kind === "new" ? "新建时间段" : "编辑时间段",
+      text: this.mode.kind === "new" ? t("segTitleNew") : t("segTitleEdit"),
     });
 
     const startRow = contentEl.createDiv({ cls: "tr-form-row" });
-    startRow.createEl("label", { text: "开始" });
+    startRow.createEl("label", { text: t("segStart") });
     const startInput = startRow.createEl("input", { type: "time", value: this.start });
     startInput.addEventListener("input", () => (this.start = startInput.value));
 
     const endRow = contentEl.createDiv({ cls: "tr-form-row" });
-    endRow.createEl("label", { text: "结束（留空 = 进行中）" });
+    endRow.createEl("label", { text: t("segEnd") });
     const endInput = endRow.createEl("input", { type: "time", value: this.end });
     endInput.addEventListener("input", () => (this.end = endInput.value));
 
     const actRow = contentEl.createDiv({ cls: "tr-form-row" });
     actRow.createEl("label", {
-      text: "描述（可留空，留空记为「未命名」；分类按描述自动判断）",
+      text: t("segDesc"),
     });
     const actInput = actRow.createEl("input", { type: "text", value: this.activity });
     actInput.addEventListener("input", () => (this.activity = actInput.value));
 
     const buttons = contentEl.createDiv({ cls: "tr-form-buttons" });
     if (this.mode.kind === "edit") {
-      const delBtn = buttons.createEl("button", { text: "删除", cls: "mod-warning" });
+      const delBtn = buttons.createEl("button", { text: t("segDelete"), cls: "mod-warning" });
       delBtn.addEventListener("click", () => void this.handleDelete());
     }
-    const cancel = buttons.createEl("button", { text: "取消" });
+    const cancel = buttons.createEl("button", { text: t("cancel") });
     cancel.addEventListener("click", () => this.close());
 
-    const saveBtn = buttons.createEl("button", { text: "保存", cls: "mod-cta" });
+    const saveBtn = buttons.createEl("button", { text: t("segSave"), cls: "mod-cta" });
     saveBtn.addEventListener("click", () => void this.handleSave());
   }
 
   private async handleSave() {
-    const validation = validateSegmentTimes(this.start, this.end);
+    const validation = validateSegmentTimes(this.start, this.end, segmentTimeMessages());
     if (!validation.ok) {
-      new Notice(validation.error ?? "时间无效");
+      new Notice(validation.error ?? t("segInvalidTime"));
       return;
     }
     const finalEnd = validation.normalizedEnd!; // "ing"（进行中）或有效 "HH:MM"
     const inProgress = finalEnd === "ing";
 
-    const activityText = this.activity.trim() || "未命名";
+    const activityText = this.activity.trim() || t("segUnnamed");
     const newSegment: Segment = {
       start: this.start,
       end: finalEnd,
@@ -97,12 +98,15 @@ export class SegmentEditorModal extends Modal {
           ? replaceLine(before, this.mode.segment.lineNumber, formatSegmentLine(newSegment))
           : appendLine(before, formatSegmentLine(newSegment));
       await this.recordsFile.writeDayContent(this.date, after);
-      const verb = this.mode.kind === "edit" ? "已更新" : "已新建";
-      new Notice(inProgress ? `${verb}（进行中）✅` : `${verb} ✅`);
+      new Notice(
+        this.mode.kind === "edit"
+          ? (inProgress ? t("segUpdatedIng") : t("segUpdatedDone"))
+          : (inProgress ? t("segCreatedIng") : t("segCreatedDone")),
+      );
       this.close();
       this.onSaved?.();
     } catch (err) {
-      new Notice(`保存失败：${(err as Error).message}`);
+      new Notice(t("saveFailed") + (err as Error).message);
       console.error("Save segment failed", err);
     }
   }
@@ -114,11 +118,11 @@ export class SegmentEditorModal extends Modal {
       // 删除 = 把该行替换为空串（保留行号不错位），下次封口/解析会跳过空行
       const after = replaceLine(before, this.mode.segment.lineNumber, "");
       await this.recordsFile.writeDayContent(this.date, after);
-      new Notice("已删除 ✅");
+      new Notice(t("deleted"));
       this.close();
       this.onSaved?.();
     } catch (err) {
-      new Notice(`删除失败：${(err as Error).message}`);
+      new Notice(t("deleteFailed") + (err as Error).message);
       console.error("Delete segment failed", err);
     }
   }

@@ -6,6 +6,7 @@ import { punchIn } from "./punchIn";
 import { nowHHMM } from "./time";
 import { getTodayDateString } from "./date";
 import { showPunchSuccessNotice } from "./openTodayFile";
+import { t } from "./i18n";
 
 export class CustomActivityModal extends Modal {
   private activity = "";
@@ -25,24 +26,24 @@ export class CustomActivityModal extends Modal {
     contentEl.empty();
     contentEl.addClass("tr-custom-modal");
 
-    contentEl.createEl("h2", { text: "自定义活动" });
+    contentEl.createEl("h2", { text: t("customTitle") });
 
     // Activity input
     const row1 = contentEl.createDiv({ cls: "tr-form-row" });
-    row1.createEl("label", { text: "做什么？" });
+    row1.createEl("label", { text: t("customWhat") });
     const input = row1.createEl("input", {
       type: "text",
-      placeholder: "例如：写时间记录仪插件",
+      placeholder: t("customPlaceholder"),
     });
     input.addEventListener("input", () => (this.activity = input.value));
     window.setTimeout(() => input.focus(), 50);
 
     // Buttons
     const buttons = contentEl.createDiv({ cls: "tr-form-buttons" });
-    const cancel = buttons.createEl("button", { text: "取消" });
+    const cancel = buttons.createEl("button", { text: t("cancel") });
     cancel.addEventListener("click", () => this.close());
 
-    const submit = buttons.createEl("button", { text: "确定打卡", cls: "mod-cta" });
+    const submit = buttons.createEl("button", { text: t("confirmPunch"), cls: "mod-cta" });
     submit.addEventListener("click", () => void this.handleSubmit());
 
     input.addEventListener("keydown", (e) => {
@@ -53,7 +54,7 @@ export class CustomActivityModal extends Modal {
   private async handleSubmit() {
     const activity = this.activity.trim();
     if (activity === "") {
-      new Notice("活动名不能为空");
+      new Notice(t("emptyActivity"));
       return;
     }
     const now = nowHHMM();
@@ -68,7 +69,7 @@ export class CustomActivityModal extends Modal {
       this.close();
       this.onPunched?.();
     } catch (err) {
-      new Notice(`打卡失败：${(err as Error).message}`);
+      new Notice(t("punchFailed") + (err as Error).message);
       console.error("Punch-in failed", err);
     }
   }

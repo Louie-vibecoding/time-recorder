@@ -1,9 +1,10 @@
 import { App, Modal, Notice, PluginSettingTab, Setting, debounce } from "obsidian";
 import TimeRecorderPlugin from "../main";
-import { DEFAULT_CATEGORIES, DEFAULT_SETTINGS, OTHER_CATEGORY } from "./settings";
+import { defaultCategoriesFor, defaultSettingsFor, OTHER_CATEGORY } from "./settings";
 import { Category } from "./types";
 import { generateCategoryId } from "./idgen";
 import { parseAliases, validateCategoryName } from "./settingsValidation";
+import { t, getLang, categoryNameMessages } from "./i18n";
 
 export class TimeRecorderSettingsTab extends PluginSettingTab {
   constructor(app: App, private plugin: TimeRecorderPlugin) {
@@ -31,38 +32,40 @@ export class TimeRecorderSettingsTab extends PluginSettingTab {
   display(): void {
     const { containerEl } = this;
     containerEl.empty();
+    // 语言相关默认值（占位符/回退值随界面语言走；用户已保存的值不受影响）
+    const langDefaults = defaultSettingsFor(getLang());
 
     // ---------- 路径区 ----------
     new Setting(containerEl)
-      .setName("记录文件夹")
-      .setDesc("时间记录 .md 文件所在文件夹。改此项不会自动搬移已有记录文件（旧文件留原处）。")
+      .setName(t("setFolderName"))
+      .setDesc(t("setFolderDesc"))
       .addText((text) =>
         text
-          .setPlaceholder(DEFAULT_SETTINGS.recordsFolder)
+          .setPlaceholder(langDefaults.recordsFolder)
           .setValue(this.plugin.settings.recordsFolder)
           .onChange((value) => {
-            this.plugin.settings.recordsFolder = value.trim() || DEFAULT_SETTINGS.recordsFolder;
+            this.plugin.settings.recordsFolder = value.trim() || langDefaults.recordsFolder;
             this.debouncedPersist();
           }),
       );
 
     new Setting(containerEl)
-      .setName("模板路径")
-      .setDesc("新建当天记录文件时套用的模板。")
+      .setName(t("setTemplateName"))
+      .setDesc(t("setTemplateDesc"))
       .addText((text) =>
         text
-          .setPlaceholder(DEFAULT_SETTINGS.templatePath)
+          .setPlaceholder(langDefaults.templatePath)
           .setValue(this.plugin.settings.templatePath)
           .onChange((value) => {
-            this.plugin.settings.templatePath = value.trim() || DEFAULT_SETTINGS.templatePath;
+            this.plugin.settings.templatePath = value.trim() || langDefaults.templatePath;
             this.debouncedPersist();
           }),
       );
 
     // ---------- 分类区 ----------
-    new Setting(containerEl).setName("分类 / Categories").setHeading();
+    new Setting(containerEl).setName(t("setCatHeading")).setHeading();
     const hint = containerEl.createEl("p", {
-      text: "活动名自动按「名字 / 关键词」归类。关键词用逗号分隔。改名 / 换 emoji / 删类都不会改动历史记录。",
+      text: t("setCatHint"),
     });
     hint.addClass("tr-settings-hint");
 
@@ -72,15 +75,15 @@ export class TimeRecorderSettingsTab extends PluginSettingTab {
 
     // other 兜底类（固定、只读、不可删）
     new Setting(containerEl)
-      .setName(`${OTHER_CATEGORY.emoji} ${OTHER_CATEGORY.name}`)
-      .setDesc("兜底分类：无法归类的活动都计入这里。固定存在、不可删除、不可配关键词。")
+      .setName(`${OTHER_CATEGORY.emoji} ${t("otherName")}`)
+      .setDesc(t("otherDesc"))
       .settingEl.addClass("tr-other-row");
 
     // ---------- 操作按钮 ----------
     new Setting(containerEl)
       .addButton((btn) =>
         btn
-          .setButtonText("+ 新增分类")
+          .setButtonText(t("addCat"))
           .setCta()
           .onClick(async () => {
             const id = generateCategoryId("", this.plugin.settings.categories.map((c) => c.id));
@@ -91,17 +94,14 @@ export class TimeRecorderSettingsTab extends PluginSettingTab {
       )
       .addButton((btn) =>
         btn
-          .setButtonText("恢复默认分类")
+          .setButtonText(t("resetCats"))
           .setWarning()
           .onClick(() => {
             new ConfirmModal(
               this.app,
-              "确定用出厂默认分类覆盖当前所有分类？此操作无法撤销。",
+              t("resetConfirm"),
               async () => {
-                this.plugin.settings.categories = DEFAULT_CATEGORIES.map((c) => ({
-                  ...c,
-                  aliases: [...c.aliases],
-                }));
+                this.plugin.settings.categories = defaultCategoriesFor(getLang());
                 await this.persist();
                 this.display();
               },
@@ -129,10 +129,10 @@ export class TimeRecorderSettingsTab extends PluginSettingTab {
     // 名字（带校验）
     setting.addText((text) =>
       text
-        .setPlaceholder("分类名")
+        .setPlaceholder(t("catNamePh"))
         .setValue(cat.name)
         .onChange((value) => {
-          const err = validateCategoryName(value, this.plugin.settings.categories, index);
+          const err = validateCategoryName(value, this.plugin.settings.categories, index, categoryNameMessages());
           if (err) {
             new Notice(err);
             return;
@@ -145,7 +145,7 @@ export class TimeRecorderSettingsTab extends PluginSettingTab {
     // 关键词（逗号分隔）
     setting.addText((text) => {
       text
-        .setPlaceholder("关键词，逗号分隔")
+        .setPlaceholder(t("aliasPh"))
         .setValue(cat.aliases.join(", "))
         .onChange((value) => {
           this.plugin.settings.categories[index].aliases = parseAliases(value);
@@ -158,7 +158,7 @@ export class TimeRecorderSettingsTab extends PluginSettingTab {
     setting.addExtraButton((btn) =>
       btn
         .setIcon("trash")
-        .setTooltip("删除此分类")
+        .setTooltip(t("delCatTip"))
         .onClick(async () => {
           this.plugin.settings.categories.splice(index, 1);
           await this.persist();
@@ -184,7 +184,7 @@ class ConfirmModal extends Modal {
     new Setting(contentEl)
       .addButton((btn) =>
         btn
-          .setButtonText("确定")
+          .setButtonText(t("ok"))
           .setWarning()
           .onClick(async () => {
             this.close();
@@ -192,7 +192,7 @@ class ConfirmModal extends Modal {
           }),
       )
       .addButton((btn) =>
-        btn.setButtonText("取消").onClick(() => this.close()),
+        btn.setButtonText(t("cancel")).onClick(() => this.close()),
       );
   }
 
