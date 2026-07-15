@@ -2,7 +2,7 @@
 
 An Obsidian plugin for **two-click time tracking**. Record what you're doing right now, back-fill missed segments on a timeline, and get a live daily summary. All your data lives in your own Markdown files.
 
-Works on **desktop and mobile** from a single codebase.
+Works on **desktop and mobile** from a single codebase. The UI is **bilingual**: Simplified Chinese when Obsidian's interface language is Chinese, English otherwise.
 
 [中文说明 →](./README.zh.md)
 

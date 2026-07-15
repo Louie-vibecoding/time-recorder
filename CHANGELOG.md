@@ -2,6 +2,15 @@
 
 All notable changes to this project are documented here. This project follows [Semantic Versioning](https://semver.org/).
 
+## 1.0.2 — 2026-07-15
+
+### Added
+- **Bilingual UI (English / Simplified Chinese)**: all interface text — punch-in grid, modals, timeline, summary view, settings tab, notices, and copied Markdown summaries — now follows Obsidian's interface language (Chinese → Chinese, anything else → English). Chinese users see exactly the same UI as before.
+- English default categories, keywords, and records-folder path (`Time Records`) for fresh installs on non-Chinese Obsidian. Existing users' settings are never touched; category ids are shared across languages so colors and categorization stay stable.
+
+### Notes
+- The record filename format (`YYYY-M-D 时间记录.md`) is a data-layer convention and intentionally stays identical across languages, so switching the interface language never orphans existing records.
+
 ## 1.0.1 — 2026-07-15
 
 Compliance release addressing Obsidian community review feedback. No feature changes.
