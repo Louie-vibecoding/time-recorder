@@ -62,6 +62,20 @@ export class TimeRecorderSettingsTab extends PluginSettingTab {
           }),
       );
 
+    // 闪记目标：空串合法（= 未配置，点击「闪记」时弹选择器），不回填默认值
+    new Setting(containerEl)
+      .setName(t("setFlashName"))
+      .setDesc(t("setFlashDesc"))
+      .addText((text) =>
+        text
+          .setPlaceholder(t("setFlashPh"))
+          .setValue(this.plugin.settings.flashNotePath)
+          .onChange((value) => {
+            this.plugin.settings.flashNotePath = value.trim();
+            this.debouncedPersist();
+          }),
+      );
+
     // ---------- 分类区 ----------
     new Setting(containerEl).setName(t("setCatHeading")).setHeading();
     const hint = containerEl.createEl("p", {

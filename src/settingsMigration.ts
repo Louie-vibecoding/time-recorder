@@ -21,6 +21,7 @@ function cloneDefaults(): TimeRecorderSettings {
     version: CURRENT_SETTINGS_VERSION,
     recordsFolder: DEFAULT_SETTINGS.recordsFolder,
     templatePath: DEFAULT_SETTINGS.templatePath,
+    flashNotePath: DEFAULT_SETTINGS.flashNotePath,
     categories: DEFAULT_CATEGORIES.map((c) => ({ ...c, aliases: [...c.aliases] })),
   };
 }
@@ -64,6 +65,10 @@ export function migrateSettings(loaded: unknown): MigrationOutcome {
       ? loaded.templatePath
       : defaults.templatePath;
 
+  // 闪记目标：空串是合法值（= 未配置），只挡类型错误，不回填非空默认。
+  const flashNotePath =
+    typeof loaded.flashNotePath === "string" ? loaded.flashNotePath : defaults.flashNotePath;
+
   let categories: Category[];
   if (!Array.isArray(loaded.categories)) {
     categories = defaults.categories;
@@ -81,7 +86,7 @@ export function migrateSettings(loaded: unknown): MigrationOutcome {
   }
 
   return {
-    settings: { version: CURRENT_SETTINGS_VERSION, recordsFolder, templatePath, categories },
+    settings: { version: CURRENT_SETTINGS_VERSION, recordsFolder, templatePath, flashNotePath, categories },
     recovered,
   };
 }

@@ -24,6 +24,7 @@ export const DEFAULT_SETTINGS: TimeRecorderSettings = {
   version: 1,
   recordsFolder: "反省日志/时间记录",
   templatePath: "反省日志/时间记录/timer template.md",
+  flashNotePath: "",
   categories: DEFAULT_CATEGORIES,
 };
 
@@ -84,6 +85,7 @@ export function defaultSettingsFor(lang: "zh" | "en"): TimeRecorderSettings {
     version: DEFAULT_SETTINGS.version,
     recordsFolder: "Time Records",
     templatePath: "Time Records/timer template.md",
+    flashNotePath: "",
     categories: defaultCategoriesFor("en"),
   };
 }

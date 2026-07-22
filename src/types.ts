@@ -30,6 +30,7 @@ export interface TimeRecorderSettings {
   version: number;
   recordsFolder: string;     // "反省日志/时间记录"
   templatePath: string;      // "反省日志/时间记录/timer template.md"
+  flashNotePath: string;     // 闪记目标笔记；"" = 未配置（点击时弹选择器）
   categories: Category[];
 }
 
