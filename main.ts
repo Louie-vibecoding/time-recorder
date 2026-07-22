@@ -13,6 +13,7 @@ import { TimeRecorderSettingsTab } from "./src/SettingsTab";
 import { splitDuplicateLeaves } from "./src/leafDedup";
 import { getLang, t } from "./src/i18n";
 import { defaultSettingsFor } from "./src/settings";
+import { openFlashNote } from "./src/flashNote";
 
 export default class TimeRecorderPlugin extends Plugin {
   settings!: TimeRecorderSettings;
@@ -101,6 +102,12 @@ export default class TimeRecorderPlugin extends Plugin {
       name: "Open timeline back-fill",
       callback: () => void this.activateTimelineView(),
     });
+
+    this.addCommand({
+      id: "flash-note",
+      name: "Flash note (jump to note end)",
+      callback: () => void openFlashNote(this.app, this),
+    });
   }
 
   onunload() {
@@ -174,6 +181,7 @@ export default class TimeRecorderPlugin extends Plugin {
       () => this.openCustomActivityModal(),
       () => void this.activateSummaryView(),
       () => void this.activateTimelineView(),
+      () => void openFlashNote(this.app, this),
     ).open();
   }
 

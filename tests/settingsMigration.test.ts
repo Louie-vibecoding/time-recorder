@@ -54,6 +54,33 @@ describe("migrateSettings", () => {
     expect(settings.templatePath).toBe(DEFAULT_SETTINGS.templatePath);
   });
 
+  it("已配置 flashNotePath → 原样保留、recovered=false", () => {
+    const input = {
+      version: 1,
+      recordsFolder: "我的/记录",
+      templatePath: "我的/模板.md",
+      flashNotePath: "收集箱/闪记.md",
+      categories: [{ id: "study", name: "学习", emoji: "📚", aliases: [] }],
+    };
+    const { settings, recovered } = migrateSettings(input);
+    expect(recovered).toBe(false);
+    expect(settings.flashNotePath).toBe("收集箱/闪记.md");
+  });
+
+  it("旧版 data.json 缺 flashNotePath / 类型错 → 回填空串（= 未配置）、recovered=false", () => {
+    const base = {
+      version: 1,
+      categories: [{ id: "study", name: "学习", emoji: "📚", aliases: [] }],
+    };
+    const missing = migrateSettings(base);
+    expect(missing.recovered).toBe(false);
+    expect(missing.settings.flashNotePath).toBe("");
+
+    const wrongType = migrateSettings({ ...base, flashNotePath: 42 });
+    expect(wrongType.recovered).toBe(false);
+    expect(wrongType.settings.flashNotePath).toBe("");
+  });
+
   it("categories 缺失 → 默认分类、recovered=true", () => {
     const { settings, recovered } = migrateSettings({ version: 1, recordsFolder: "x" });
     expect(recovered).toBe(true);

@@ -19,6 +19,7 @@ export class GridModal extends Modal {
     private openCustomActivity?: () => void,
     private openSummary?: () => void,
     private openTimeline?: () => void,
+    private openFlash?: () => void,
   ) {
     super(app);
   }
@@ -68,6 +69,12 @@ export class GridModal extends Modal {
     openTimelineBtn.addEventListener("click", () => {
       this.close();
       this.openTimeline?.();
+    });
+
+    const flashBtn = footer.createEl("button", { text: t("btnFlash") });
+    flashBtn.addEventListener("click", () => {
+      this.close();
+      this.openFlash?.();
     });
 
     const closeBtn = footer.createEl("button", { text: t("btnClose") });
