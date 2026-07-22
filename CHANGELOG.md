@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. This project follows [Semantic Versioning](https://semver.org/).
 
+## 1.0.4 — 2026-07-22
+
+### Added
+- **⚡ Flash note (闪记)**: a new button in the punch-in grid footer plus a `Flash note` command (bindable to a hotkey or the mobile toolbar) that jumps straight to the end of a chosen note — cursor lands on the last line, ready to type. Configure the target note in settings, or just click the button: if unset, a fuzzy picker (vault notes, most recently modified first) opens and your pick is remembered. A renamed or deleted target shows a notice and falls back to the picker; reading view switches to edit mode on jump.
+
 ## 1.0.3 — 2026-07-15
 
 ### Changed
