@@ -44,12 +44,6 @@ An end time of `ing` means the segment is still open. Categories are inferred fr
 
 Full changelog · 完整日志：[CHANGELOG](https://github.com/Louie-vibecoding/time-recorder/blob/master/CHANGELOG.md) / [Releases](https://github.com/Louie-vibecoding/time-recorder/releases)
 
-## Roadmap · 路线图
-
-- 1.1 — multi-step undo, segment cut / paste · 多步撤销、时间段剪切/粘贴
-- 1.2 — summary charts · 汇总图表
-- 1.3 — tag dimension, Android notifications, Tasker integration · 标签维度、安卓通知、Tasker 集成
-
 ## License
 
 MIT
