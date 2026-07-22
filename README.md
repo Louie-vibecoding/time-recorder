@@ -1,74 +1,55 @@
 # Time Recorder
 
-An Obsidian plugin for **two-click time tracking**. Record what you're doing right now, back-fill missed segments on a timeline, and get a live daily summary. All your data lives in your own Markdown files.
+An Obsidian plugin for **two-click time tracking**. Punch in what you're doing right now, back-fill missed segments on a 24-hour timeline, and get live daily / weekly / monthly summaries. All your data lives in your own Markdown files. Desktop and Android from a single codebase; the UI is bilingual and follows Obsidian's interface language (English / 简体中文).
 
-Works on **desktop and mobile** from a single codebase. The UI is **bilingual**: Simplified Chinese when Obsidian's interface language is Chinese, English otherwise. Category names are your own data and are never auto-translated — after switching languages, hit **Restore default categories** in settings to get defaults in the new language; built-in keyword bridging keeps records written before the switch correctly categorized.
+让你**两次点击就能完成一次打卡**的 Obsidian 时间记录插件。实时打卡、在 24 小时时间轴上补录漏掉的时段、自动生成今日 / 本周 / 本月汇总。所有数据都保存在你自己的 Markdown 文件里。桌面端与安卓端同一套代码，界面中英双语、跟随 Obsidian 界面语言。
 
-## 中文简介
+## Features · 功能
 
-让你 **两次点击就能完成一次打卡** 的 Obsidian 时间记录插件。可实时打卡、可睡前补录、自动出今日汇总表。所有数据都在你自己的 Markdown 文件里。支持桌面端和移动端，同一套代码。界面中英双语：Obsidian 界面语言为中文时显示中文，其它语言显示英文。分类名属于你自己的数据、不会被自动翻译——切换界面语言后，在设置里点「恢复默认分类」即可获得对应语言的默认分类，内置的关键词桥接会让切换前的历史记录照样正确归类。
+- **Two-click punch-in** — open the grid, tap a category (or type a custom activity); the previous segment auto-closes. 两次点击打卡：打开九宫格点一下分类（也可输入自定义活动），上一段自动收尾。
+- **Timeline back-fill** — tap a gap on the 24-hour timeline to add a segment, tap a block to edit or delete; drag edges to resize on desktop. 时间轴补录：在 24 小时时间轴上点空隙补录、点色块编辑或删除，桌面端可拖动边缘调整时长。
+- **Live summaries** — today / week / month breakdown by category with prev/next navigation; copy as a Markdown table. 实时汇总：今日 / 本周 / 本月按分类统计、支持前后翻页，可一键复制为 Markdown 表格。
+- **⚡ Flash note** — jump straight to the end of a chosen note from the punch-in grid, cursor ready to type. 闪记：从打卡面板一键跳到指定笔记末尾，光标就位、直接输入。
+- **Undo & status** — one-tap undo for the latest punch; the status bar (desktop) or ribbon tooltip (Android) shows what's in progress. 撤销与状态：最近一次打卡可一键撤销；状态栏（桌面）/ 功能区提示（安卓）显示进行中的活动。
+- **Your categories, your data** — add / rename / remove categories and keywords in settings, restore defaults anytime; category names are never auto-translated, and keyword bridging keeps records written before a language switch correctly categorized. 分类即数据：在设置里增删改分类与关键词、随时恢复默认；分类名绝不会被自动翻译，切换界面语言后，关键词桥接让旧记录照常正确归类。
+- **Data safety** — a corrupted settings file falls back to defaults with an automatic backup and a plain-language notice. 数据安全：设置文件损坏时自动回退默认值、备份坏文件，并用明白话提醒你。
 
-## Features
+## Installation · 安装
 
-- **Grid punch-in**: open a modal, tap a category — the previous open segment auto-closes and a new one starts. Two clicks total.
-- **Custom activity**: type a free-text activity name and pick a category for grouping.
-- **Timeline back-fill**: a 24-hour vertical timeline. Click an empty slot to add a segment (with smart-fill range to the next one), click an existing block to edit or delete. On desktop, drag the top/bottom edges to resize (snaps to 5 minutes).
-- **Summary**: a sidebar (desktop) or full-screen view (Android) with **today / week / month** tabs showing the breakdown by category, plus prev/next navigation within each period (yesterday/tomorrow, last/next week or month). Copy it as a Markdown table for your daily review or to hand to an LLM.
-- **1-step undo** on the latest punch.
-- **Status bar** (desktop) / **ribbon tooltip** (Android) shows what's currently in progress.
-- **Editable settings**: add / remove / rename categories, edit their keywords and the records folder — all from the settings tab, no file editing required. Restore defaults anytime.
-- **Robust data guard**: if the settings file is ever corrupted, the plugin falls back to defaults, backs up the broken file (`data.json.bak`), and tells you in plain language — it never silently loses your data, and never downgrades settings written by a newer version on another device.
-- **Auto-create** today's record file on startup, so you can punch in immediately.
+Obsidian → Settings → Community plugins → Browse → search **"Time Recorder"** → Install → Enable.
 
-## Installation
+Obsidian → 设置 → 第三方插件 → 浏览 → 搜索 **"Time Recorder"** → 安装 → 启用。
 
-### From Community Plugins (when released)
+> **Android sync tip · 安卓同步提示**: Obsidian Sync does not sync community plugins by default — turn on *Sync → Sync configuration → Installed community plugins* on both devices. Obsidian Sync 默认不同步第三方插件，请在电脑和手机两端同时开启「同步 → 同步配置 → 已安装的第三方插件」。
 
-1. Obsidian → Settings → Community plugins → Browse
-2. Search "Time Recorder"
-3. Install → Enable
+## File format · 数据格式
 
-### Manual
-
-1. Download `manifest.json`, `main.js`, and `styles.css` from the latest [release](https://github.com/Louie-vibecoding/time-recorder/releases)
-2. Put them in `<your-vault>/.obsidian/plugins/time-recorder/`
-3. Reload Obsidian → enable the plugin
-
-### Android setup (recommended)
-
-1. Settings → Mobile → Toolbar (or use the ribbon icons)
-2. Add "Time Recorder: Punch in" to the first position
-
-> **Android sync note**: Obsidian Sync does **not** sync community plugins by default. On the PC, turn on Settings → Sync → Sync configuration → Installed community plugins, and turn on the **same** switch on Android. Also add `.obsidian/plugins/time-recorder/node_modules` to your Sync exclusions to avoid syncing a large dev folder.
-
-## File format
-
-Each daily record file is `<records-folder>/{YYYY-M-D} 时间记录.md`. Each segment is one line:
+One Markdown file per day, one line per segment / 每天一个 Markdown 文件，每行一段：
 
 ```
 - [ ] 08:30 - 10:00 学习obsidian
 ```
 
-- An end time of `ing` means the segment is still open (in progress). Legacy records that used `00:00` for "open" are still read correctly.
-- Existing records written by hand in this format work without modification.
-- A category is **inferred from the activity name** at read time (it is not stored in the file), so adding, renaming, or removing categories never touches your historical records.
+An end time of `ing` means the segment is still open. Categories are inferred from the activity name at read time and are never written into the file — your history stays plain, portable Markdown, and hand-written records in this format just work.
 
-## Settings
+结束时间 `ing` 表示该段仍在进行中。分类在读取时由活动名推断、不写入文件——历史记录始终是纯粹、可迁移的 Markdown，手写的同格式记录也能直接识别。
 
-| Setting | Default | What it does |
-|---|---|---|
-| Records folder | `反省日志/时间记录` | Where daily files live |
-| Template path | `反省日志/时间记录/timer template.md` | Optional template copied when a new day file is created |
-| Categories | 10 defaults + 其他 | Add / remove / rename, and edit each category's keywords, directly in the settings tab |
+## Version history · 版本记录
 
-The default categories are: 😴 睡眠 / 📚 学习 / 🍱 饮食 / 🚿 个人卫生 / 🚗 通勤 / 💬 社交 / 🧹 家务 / 💼 工作 / 🏃 运动 / 🎮 娱乐, plus a fixed ❓ 其他 fallback.
+- **1.0.4** (2026-07-22) — ⚡ Flash note: jump to the end of a chosen note from the punch-in grid. 新增闪记：从打卡面板一键跳到指定笔记末尾。
+- **1.0.3** (2026-07-15) — "Restore default categories" bridges languages, so pre-switch records still categorize correctly. 「恢复默认分类」支持跨语言桥接，切换语言前的记录照常归类。
+- **1.0.2** (2026-07-15) — Bilingual UI following Obsidian's interface language. 界面双语化，跟随 Obsidian 界面语言。
+- **1.0.1** (2026-07-15) — Compliance fixes from community review; automated CI releases. 社区审核合规修复；CI 自动发版。
+- **1.0.0** (2026-07-15) — Initial release: grid punch-in, timeline back-fill, summaries, undo, data guard. 首发：九宫格打卡、时间轴补录、汇总、撤销、数据守卫。
 
-## Roadmap
+Full changelog · 完整日志：[CHANGELOG](https://github.com/Louie-vibecoding/time-recorder/blob/master/CHANGELOG.md) / [Releases](https://github.com/Louie-vibecoding/time-recorder/releases)
 
-- 1.1: multi-step undo, segment cut/paste
-- 1.2: summary charts
-- 1.3: tag dimension, Android notifications, Tasker integration
+## Roadmap · 路线图
+
+- 1.1 — multi-step undo, segment cut / paste · 多步撤销、时间段剪切/粘贴
+- 1.2 — summary charts · 汇总图表
+- 1.3 — tag dimension, Android notifications, Tasker integration · 标签维度、安卓通知、Tasker 集成
 
 ## License
 
-MIT — see [LICENSE](./LICENSE).
+MIT
