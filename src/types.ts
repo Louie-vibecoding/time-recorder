@@ -17,6 +17,12 @@ export interface DayRecord {
   segments: Segment[];
 }
 
+/** 界面语言。数据层格式（文件名/records 行）永不随语言变。 */
+export type Lang = "zh" | "en" | "ja" | "ko";
+
+/** 语言设置："auto" = 跟随 Obsidian 界面语言。 */
+export type LanguageSetting = "auto" | Lang;
+
 /** A category in the 9-grid selector. */
 export interface Category {
   id: string;         // "study"
@@ -28,6 +34,7 @@ export interface Category {
 /** Plugin settings, persisted to data.json. */
 export interface TimeRecorderSettings {
   version: number;
+  language: LanguageSetting; // 界面语言；"auto" = 跟随 Obsidian（1.0.4 及之前的唯一行为）
   recordsFolder: string;     // "反省日志/时间记录"
   templatePath: string;      // "反省日志/时间记录/timer template.md"
   flashNotePath: string;     // 闪记目标笔记；"" = 未配置（点击时弹选择器）

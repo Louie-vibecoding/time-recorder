@@ -347,3 +347,8 @@
   min-height: 44px; /* 移动端点触 */
   padding: 0 var(--size-4-3);
 }
+
+/* 切语言后「分类已保留」的引导提示（会话级） */
+.tr-lang-cat-hint {
+  color: var(--text-accent);
+}

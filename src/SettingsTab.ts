@@ -1,12 +1,20 @@
 import { App, Modal, Notice, PluginSettingTab, Setting, debounce } from "obsidian";
 import TimeRecorderPlugin from "../main";
-import { defaultCategoriesForRestore, defaultSettingsFor, OTHER_CATEGORY } from "./settings";
-import { Category } from "./types";
+import {
+  defaultCategoriesForRestore,
+  defaultSettingsFor,
+  OTHER_CATEGORY,
+  pristineDefaultLang,
+} from "./settings";
+import { Category, LanguageSetting } from "./types";
 import { generateCategoryId } from "./idgen";
 import { parseAliases, validateCategoryName } from "./settingsValidation";
-import { t, getLang, categoryNameMessages } from "./i18n";
+import { t, getLang, setLangOverride, format, categoryNameMessages, LANG_NAMES } from "./i18n";
 
 export class TimeRecorderSettingsTab extends PluginSettingTab {
+  // 会话级：切语言后分类被保留（用户自定义过）时，在分类区显示一次引导提示。
+  private showLangCatHint = false;
+
   constructor(app: App, private plugin: TimeRecorderPlugin) {
     super(app, plugin);
   }
@@ -22,20 +30,62 @@ export class TimeRecorderSettingsTab extends PluginSettingTab {
     await this.plugin.refreshAll();
   }
 
+  /**
+   * 切换界面语言。绕开 debounce（避免落盘与整页重画竞争）：
+   * 1. 写入偏好并让 override 立即生效（此后所有 t() 用新语言）。
+   * 2. 分类跟随：纯净（= 某语言出厂默认，零数据损失、切回即还原）→ 自动替换为
+   *    目标语言默认（含跨语言关键词桥接）；自定义过 → 一字不动，只显示引导提示。
+   * 3. persist（落盘 + 状态栏/已开视图刷新）后整页重画。
+   * recordsFolder / templatePath / flashNotePath / 数据层格式在本路径零写入。
+   */
+  private async applyLanguage(lang: LanguageSetting): Promise<void> {
+    this.plugin.settings.language = lang;
+    setLangOverride(lang === "auto" ? null : lang);
+    const target = getLang();
+    const pristine = pristineDefaultLang(this.plugin.settings.categories);
+    if (pristine && pristine !== target) {
+      this.plugin.settings.categories = defaultCategoriesForRestore(target);
+      this.showLangCatHint = false;
+      new Notice(format(t("catsFollowedLang"), { lang: LANG_NAMES[target] }));
+    } else if (!pristine) {
+      this.showLangCatHint = true;
+    }
+    await this.persist();
+    this.display();
+  }
+
   // 离开设置页时立即把最后一次（可能还在 debounce 窗口内的）改动落盘，防丢。
   // 先取消 pending 的 debounce，避免离开后再多触发一次刷新。
+  // 语言提示是会话级的：关掉设置页即失效（SettingsTab 实例是插件级单例，必须在此重置）。
   hide(): void {
     this.debouncedPersist.cancel();
     void this.persist();
+    this.showLangCatHint = false;
   }
 
   display(): void {
     const { containerEl } = this;
     containerEl.empty();
-    // 语言相关默认值（占位符/回退值随界面语言走；用户已保存的值不受影响）
+    // 语言相关默认值（仅作占位符提示；用户已保存的值不受影响）
     const langDefaults = defaultSettingsFor(getLang());
 
+    // ---------- 界面语言 ----------
+    new Setting(containerEl)
+      .setName(t("setLangName"))
+      .setDesc(t("setLangDesc"))
+      .addDropdown((dd) => {
+        dd.addOption("auto", t("langAuto"));
+        for (const [code, name] of Object.entries(LANG_NAMES)) {
+          dd.addOption(code, name);
+        }
+        dd.setValue(this.plugin.settings.language).onChange(async (value) => {
+          await this.applyLanguage(value as LanguageSetting);
+        });
+      });
+
     // ---------- 路径区 ----------
+    // 清空输入框 = 保留上次已保存的值（绝不按语言默认回填路径——
+    // 否则切过语言的老用户误清空后，记录文件夹会被指到不存在的默认路径，历史记录“失踪”）。
     new Setting(containerEl)
       .setName(t("setFolderName"))
       .setDesc(t("setFolderDesc"))
@@ -44,7 +94,8 @@ export class TimeRecorderSettingsTab extends PluginSettingTab {
           .setPlaceholder(langDefaults.recordsFolder)
           .setValue(this.plugin.settings.recordsFolder)
           .onChange((value) => {
-            this.plugin.settings.recordsFolder = value.trim() || langDefaults.recordsFolder;
+            const v = value.trim();
+            if (v) this.plugin.settings.recordsFolder = v;
             this.debouncedPersist();
           }),
       );
@@ -57,7 +108,8 @@ export class TimeRecorderSettingsTab extends PluginSettingTab {
           .setPlaceholder(langDefaults.templatePath)
           .setValue(this.plugin.settings.templatePath)
           .onChange((value) => {
-            this.plugin.settings.templatePath = value.trim() || langDefaults.templatePath;
+            const v = value.trim();
+            if (v) this.plugin.settings.templatePath = v;
             this.debouncedPersist();
           }),
       );
@@ -82,6 +134,13 @@ export class TimeRecorderSettingsTab extends PluginSettingTab {
       text: t("setCatHint"),
     });
     hint.addClass("tr-settings-hint");
+
+    // 切语言后分类被保留时的一次性引导（会话级，不落盘、关掉设置页即消失）
+    if (this.showLangCatHint) {
+      const langHint = containerEl.createEl("p", { text: t("langCatHint") });
+      langHint.addClass("tr-settings-hint");
+      langHint.addClass("tr-lang-cat-hint");
+    }
 
     this.plugin.settings.categories.forEach((cat, index) => {
       this.renderCategoryRow(containerEl, cat, index);
@@ -116,6 +175,7 @@ export class TimeRecorderSettingsTab extends PluginSettingTab {
               t("resetConfirm"),
               async () => {
                 this.plugin.settings.categories = defaultCategoriesForRestore(getLang());
+                this.showLangCatHint = false;
                 await this.persist();
                 this.display();
               },

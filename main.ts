@@ -11,7 +11,7 @@ import { TimelineView, VIEW_TYPE_TIMELINE } from "./src/TimelineView";
 import { getTodayDateString } from "./src/date";
 import { TimeRecorderSettingsTab } from "./src/SettingsTab";
 import { splitDuplicateLeaves } from "./src/leafDedup";
-import { getLang, t } from "./src/i18n";
+import { getLang, setLangOverride, t } from "./src/i18n";
 import { defaultSettingsFor } from "./src/settings";
 import { openFlashNote } from "./src/flashNote";
 
@@ -206,11 +206,14 @@ export default class TimeRecorderPlugin extends Plugin {
     }
     const { settings, recovered } = migrateSettings(loaded);
     this.settings = settings;
-    // 全新安装（无 data.json）且界面为英文 → 用英文默认（分类名/关键词/文件夹）。
+    // 全新安装（无 data.json）→ 按 Obsidian 界面语言给整套默认（分类名/关键词/文件夹）。
+    // 此时 language 尚为 "auto"、override 未设置，getLang() 即自动检测值。
     // 已有 data.json 的用户（含部分恢复）永不改写，避免动到用户数据。
-    if (loaded === null && getLang() === "en") {
-      this.settings = defaultSettingsFor("en");
+    if (loaded === null) {
+      this.settings = defaultSettingsFor(getLang());
     }
+    // 语言覆盖必须在第一条用户可见文案（下面的 corruptSettings Notice）之前生效。
+    setLangOverride(this.settings.language === "auto" ? null : this.settings.language);
     if (recovered || loadFailed) {
       await this.backupCorruptSettings();
       new Notice(

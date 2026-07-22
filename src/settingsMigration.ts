@@ -1,4 +1,4 @@
-import { Category, TimeRecorderSettings } from "./types";
+import { Category, LanguageSetting, TimeRecorderSettings } from "./types";
 import { DEFAULT_CATEGORIES, DEFAULT_SETTINGS } from "./settings";
 
 /** 当前设置 schema 版本（单一真相 = DEFAULT_SETTINGS.version）。 */
@@ -19,11 +19,22 @@ function isPlainObject(v: unknown): v is Record<string, unknown> {
 function cloneDefaults(): TimeRecorderSettings {
   return {
     version: CURRENT_SETTINGS_VERSION,
+    language: DEFAULT_SETTINGS.language,
     recordsFolder: DEFAULT_SETTINGS.recordsFolder,
     templatePath: DEFAULT_SETTINGS.templatePath,
     flashNotePath: DEFAULT_SETTINGS.flashNotePath,
     categories: DEFAULT_CATEGORIES.map((c) => ({ ...c, aliases: [...c.aliases] })),
   };
+}
+
+/**
+ * 语言偏好抢救：缺失（1.0.4 及之前的 data.json）或任何非法值一律回退 "auto"，
+ * 且不置 recovered —— 一个纯偏好字段坏了不值得吓用户「设置损坏」并备份文件。
+ */
+function normalizeLanguage(raw: unknown): LanguageSetting {
+  return raw === "auto" || raw === "zh" || raw === "en" || raw === "ja" || raw === "ko"
+    ? raw
+    : "auto";
 }
 
 /** 抢救单个分类条目；缺必需字段返回 null（= 丢弃）。 */
@@ -86,7 +97,14 @@ export function migrateSettings(loaded: unknown): MigrationOutcome {
   }
 
   return {
-    settings: { version: CURRENT_SETTINGS_VERSION, recordsFolder, templatePath, flashNotePath, categories },
+    settings: {
+      version: CURRENT_SETTINGS_VERSION,
+      language: normalizeLanguage(loaded.language),
+      recordsFolder,
+      templatePath,
+      flashNotePath,
+      categories,
+    },
     recovered,
   };
 }

@@ -145,4 +145,51 @@ describe("migrateSettings", () => {
     settings.categories[0].aliases.push("污染");
     expect(DEFAULT_CATEGORIES[0].aliases).not.toContain("污染");
   });
+
+  describe("language 字段（1.0.5 新增）", () => {
+    const base = {
+      version: 1,
+      recordsFolder: "我的/记录",
+      templatePath: "我的/模板.md",
+      categories: [{ id: "study", name: "学习", emoji: "📚", aliases: [] }],
+    };
+
+    it("1.0.4 及之前的 data.json（缺 language）→ 回填 auto、recovered=false", () => {
+      const { settings, recovered } = migrateSettings(base);
+      expect(recovered).toBe(false);
+      expect(settings.language).toBe("auto");
+    });
+
+    it("合法值（auto/zh/en/ja/ko）原样保留", () => {
+      for (const lang of ["auto", "zh", "en", "ja", "ko"] as const) {
+        const { settings, recovered } = migrateSettings({ ...base, language: lang });
+        expect(recovered).toBe(false);
+        expect(settings.language).toBe(lang);
+      }
+    });
+
+    it("非法值（未知语言/数字/对象）→ 静默回退 auto、绝不置 recovered（纯偏好字段坏了不吓用户）", () => {
+      for (const bad of ["fr", "zh-TW", 42, {}, null, true]) {
+        const { settings, recovered } = migrateSettings({ ...base, language: bad });
+        expect(recovered, JSON.stringify(bad)).toBe(false);
+        expect(settings.language, JSON.stringify(bad)).toBe("auto");
+      }
+    });
+
+    it("1.0.4 真实 data.json 升级快照：除新增 language:auto 外逐字段一致", () => {
+      const v104 = {
+        version: 1,
+        recordsFolder: "反省日志/时间记录",
+        templatePath: "反省日志/时间记录/timer template.md",
+        flashNotePath: "收集箱.md",
+        categories: [
+          { id: "sleep", name: "睡觉觉", emoji: "😴", aliases: ["睡觉", "午睡"] },
+          { id: "study", name: "学习", emoji: "📚", aliases: ["阅读"] },
+        ],
+      };
+      const { settings, recovered } = migrateSettings(v104);
+      expect(recovered).toBe(false);
+      expect(settings).toEqual({ ...v104, language: "auto" });
+    });
+  });
 });
