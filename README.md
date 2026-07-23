@@ -36,7 +36,7 @@ An end time of `ing` means the segment is still open. Categories are inferred fr
 
 ## Version history · 版本记录
 
-- **1.0.5** (2026-07-23) — Language setting with Japanese & Korean support; unmodified default categories follow the language automatically. 新增界面语言设置，支持日语和韩语；未修改的默认分类自动跟随语言。
+- **1.0.5** (2026-07-23) — Language setting: the UI now supports Simplified Chinese, English, Japanese and Korean; unmodified default categories follow the language automatically. 新增界面语言设置，现支持简体中文、英语、日语、韩语四种语言；未修改的默认分类自动跟随语言。
 - **1.0.4** (2026-07-22) — ⚡ Flash note: jump to the end of a chosen note from the punch-in grid. 新增闪记：从打卡面板一键跳到指定笔记末尾。
 - **1.0.3** (2026-07-15) — "Restore default categories" bridges languages, so pre-switch records still categorize correctly. 「恢复默认分类」支持跨语言桥接，切换语言前的记录照常归类。
 - **1.0.2** (2026-07-15) — Bilingual UI following Obsidian's interface language. 界面双语化，跟随 Obsidian 界面语言。
