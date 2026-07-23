@@ -1,7 +1,7 @@
 {
   "name": "time-recorder",
   "private": true,
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Time Recorder plugin for Obsidian",
   "main": "main.js",
   "scripts": {
@@ -10,7 +10,10 @@
     "test": "vitest run",
     "test:watch": "vitest"
   },
-  "keywords": ["obsidian", "time-tracking"],
+  "keywords": [
+    "obsidian",
+    "time-tracking"
+  ],
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^20.10.0",

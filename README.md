@@ -1,8 +1,8 @@
 # Time Recorder
 
-An Obsidian plugin for **two-click time tracking**. Punch in what you're doing right now, back-fill missed segments on a 24-hour timeline, and get live daily / weekly / monthly summaries. All your data lives in your own Markdown files. Desktop and Android from a single codebase; the UI is bilingual and follows Obsidian's interface language (English / 简体中文).
+An Obsidian plugin for **two-click time tracking**. Punch in what you're doing right now, back-fill missed segments on a 24-hour timeline, and get live daily / weekly / monthly summaries. All your data lives in your own Markdown files. Desktop and Android from a single codebase; the UI is available in **English / 简体中文 / 日本語 / 한국어** — following Obsidian's interface language by default, with a manual override in settings.
 
-让你**两次点击就能完成一次打卡**的 Obsidian 时间记录插件。实时打卡、在 24 小时时间轴上补录漏掉的时段、自动生成今日 / 本周 / 本月汇总。所有数据都保存在你自己的 Markdown 文件里。桌面端与安卓端同一套代码，界面中英双语、跟随 Obsidian 界面语言。
+让你**两次点击就能完成一次打卡**的 Obsidian 时间记录插件。实时打卡、在 24 小时时间轴上补录漏掉的时段、自动生成今日 / 本周 / 本月汇总。所有数据都保存在你自己的 Markdown 文件里。桌面端与安卓端同一套代码，界面支持**简体中文 / English / 日本語 / 한국어**四种语言——默认跟随 Obsidian 界面语言，也可在设置中手动选择。
 
 ## Features · 功能
 
@@ -11,7 +11,7 @@ An Obsidian plugin for **two-click time tracking**. Punch in what you're doing r
 - **Live summaries** — today / week / month breakdown by category with prev/next navigation; copy as a Markdown table. 实时汇总：今日 / 本周 / 本月按分类统计、支持前后翻页，可一键复制为 Markdown 表格。
 - **⚡ Flash note** — jump straight to the end of a chosen note from the punch-in grid, cursor ready to type. 闪记：从打卡面板一键跳到指定笔记末尾，光标就位、直接输入。
 - **Undo & status** — one-tap undo for the latest punch; the status bar (desktop) or ribbon tooltip (Android) shows what's in progress. 撤销与状态：最近一次打卡可一键撤销；状态栏（桌面）/ 功能区提示（安卓）显示进行中的活动。
-- **Your categories, your data** — add / rename / remove categories and keywords in settings, restore defaults anytime; category names are never auto-translated, and keyword bridging keeps records written before a language switch correctly categorized. 分类即数据：在设置里增删改分类与关键词、随时恢复默认；分类名绝不会被自动翻译，切换界面语言后，关键词桥接让旧记录照常正确归类。
+- **Your categories, your data** — add / rename / remove categories and keywords in settings, restore defaults anytime. On a language switch, default categories you never modified follow the new language (keyword bridging keeps old records correctly categorized), while categories you added or edited are kept as-is. 分类即数据：在设置里增删改分类与关键词、随时恢复默认。切换界面语言时，未修改过的默认分类自动跟随新语言（关键词桥接让旧记录照常归类），你新增或修改过的分类原样保留。
 - **Data safety** — a corrupted settings file falls back to defaults with an automatic backup and a plain-language notice. 数据安全：设置文件损坏时自动回退默认值、备份坏文件，并用明白话提醒你。
 
 ## Installation · 安装
@@ -36,6 +36,7 @@ An end time of `ing` means the segment is still open. Categories are inferred fr
 
 ## Version history · 版本记录
 
+- **1.0.5** (2026-07-23) — Language setting with Japanese & Korean support; unmodified default categories follow the language automatically. 新增界面语言设置，支持日语和韩语；未修改的默认分类自动跟随语言。
 - **1.0.4** (2026-07-22) — ⚡ Flash note: jump to the end of a chosen note from the punch-in grid. 新增闪记：从打卡面板一键跳到指定笔记末尾。
 - **1.0.3** (2026-07-15) — "Restore default categories" bridges languages, so pre-switch records still categorize correctly. 「恢复默认分类」支持跨语言桥接，切换语言前的记录照常归类。
 - **1.0.2** (2026-07-15) — Bilingual UI following Obsidian's interface language. 界面双语化，跟随 Obsidian 界面语言。

@@ -2,6 +2,17 @@
 
 All notable changes to this project are documented here. This project follows [Semantic Versioning](https://semver.org/).
 
+## 1.0.5 — 2026-07-23
+
+### Added
+- **Language setting**: a dropdown at the top of the settings tab — Follow Obsidian (default) / 简体中文 / English / 日本語 / 한국어. Japanese and Korean are fully supported (all UI text plus native default category sets). Switching applies instantly — no restart needed.
+- **Per-category language follow**: default categories you never modified switch to the new language automatically, with cross-language keyword bridging so records written in any language still categorize correctly. Categories you added or edited are kept as-is (a one-time note in settings explains what changed and what didn't). Record files, folders and history are never touched by a language switch.
+
+### Changed
+- "Restore default categories" now bridges keywords across all four languages (was Chinese ↔ English only).
+- "Follow Obsidian" now detects Japanese and Korean interface locales (previously fell back to English).
+- Clearing the records-folder or template-path input now keeps the last saved value instead of refilling a language default, so the folder can never silently point away from your existing records.
+
 ## 1.0.4 — 2026-07-22
 
 ### Added
