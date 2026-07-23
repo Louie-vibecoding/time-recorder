@@ -25,8 +25,9 @@ import {
   defaultCategoriesFor,
   defaultCategoriesForRestore,
   defaultSettingsFor,
+  followCategoriesToLang,
+  isPristineDefaultCategory,
   legacyRestoreCategories,
-  pristineDefaultLang,
 } from "../src/settings";
 import { inferCategoryId } from "../src/categoryInfer";
 
@@ -300,49 +301,89 @@ describe("defaultCategoriesForRestore 跨语言关键词桥接（四语言互桥
   });
 });
 
-describe("pristineDefaultLang 纯净判定", () => {
-  it("出厂默认集 / 恢复集都命中对应语言", () => {
+describe("isPristineDefaultCategory 单条纯净判定", () => {
+  it("出厂条目 / 恢复形状 / legacy 双语恢复形状 → true", () => {
     for (const lang of ALL_LANGS) {
-      expect(pristineDefaultLang(defaultCategoriesFor(lang)), `for(${lang})`).toBe(lang);
+      expect(isPristineDefaultCategory(defaultCategoriesFor(lang)[0]), `for(${lang})`).toBe(true);
       expect(
-        pristineDefaultLang(defaultCategoriesForRestore(lang)),
+        isPristineDefaultCategory(defaultCategoriesForRestore(lang)[2]),
         `restore(${lang})`,
-      ).toBe(lang);
+      ).toBe(true);
     }
+    expect(isPristineDefaultCategory(legacyRestoreCategories("zh")[0])).toBe(true);
+    expect(isPristineDefaultCategory(legacyRestoreCategories("en")[5])).toBe(true);
   });
 
-  it("aliases 顺序打乱 / 大小写变化仍命中（与桥接去重规则一致）", () => {
-    const cats = defaultCategoriesFor("en");
-    cats[0].aliases.reverse();
-    cats[1].aliases = cats[1].aliases.map((a) => a.toUpperCase());
-    expect(pristineDefaultLang(cats)).toBe("en");
+  it("aliases 顺序打乱 / 大小写变化仍算纯净（与桥接去重规则一致）", () => {
+    const cat = defaultCategoriesFor("en")[1];
+    cat.aliases.reverse();
+    cat.aliases = cat.aliases.map((a) => a.toUpperCase());
+    expect(isPristineDefaultCategory(cat)).toBe(true);
   });
 
-  it("任何一处自定义（改名/换 emoji/增删关键词/删分类）→ null，绝不误伤用户数据", () => {
-    const renamed = defaultCategoriesFor("zh");
-    renamed[2].name = "干饭";
-    expect(pristineDefaultLang(renamed)).toBeNull();
+  it("改名 / 换 emoji / 增关键词 / 自定义 id → false", () => {
+    const renamed = { ...defaultCategoriesFor("zh")[2], name: "干饭" };
+    expect(isPristineDefaultCategory(renamed)).toBe(false);
 
-    const emojiChanged = defaultCategoriesFor("zh");
-    emojiChanged[0].emoji = "🌙";
-    expect(pristineDefaultLang(emojiChanged)).toBeNull();
+    const emojiChanged = { ...defaultCategoriesFor("zh")[0], emoji: "🌙" };
+    expect(isPristineDefaultCategory(emojiChanged)).toBe(false);
 
-    const aliasAdded = defaultCategoriesFor("en");
-    aliasAdded[3].aliases.push("skincare");
-    expect(pristineDefaultLang(aliasAdded)).toBeNull();
+    const base = defaultCategoriesFor("en")[3];
+    const aliasAdded = { ...base, aliases: [...base.aliases, "skincare"] };
+    expect(isPristineDefaultCategory(aliasAdded)).toBe(false);
 
-    const removed = defaultCategoriesFor("en").slice(1);
-    expect(pristineDefaultLang(removed)).toBeNull();
+    expect(
+      isPristineDefaultCategory({ id: "cat-1", name: "记录", emoji: "Time", aliases: [] }),
+    ).toBe(false);
+  });
+});
+
+describe("followCategoriesToLang 逐分类语言跟随", () => {
+  const custom = { id: "cat-1", name: "记录", emoji: "Time", aliases: ["复盘"] };
+
+  it("全默认 → 全部跟随为目标语言恢复形状", () => {
+    const r = followCategoriesToLang(defaultCategoriesFor("zh"), "ja");
+    expect(r.changed).toBe(true);
+    expect(r.keptCount).toBe(0);
+    expect(r.followedCount).toBe(DEFAULT_CATEGORIES.length);
+    expect(r.categories.map((c) => c.name)).toEqual(
+      defaultCategoriesForRestore("ja").map((c) => c.name),
+    );
   });
 
-  it("来回切换幂等：恢复集在目标语言下仍判定为纯净（切回即可再次自动跟随）", () => {
-    const afterSwitch = defaultCategoriesForRestore("ja");
-    expect(pristineDefaultLang(afterSwitch)).toBe("ja");
-    const backAgain = defaultCategoriesForRestore("zh");
-    expect(pristineDefaultLang(backAgain)).toBe("zh");
+  it("新增自定义分类 → 默认分类照常跟随，自定义条目原位保留（用户实测场景）", () => {
+    const cats = [...defaultCategoriesFor("zh"), custom];
+    const r = followCategoriesToLang(cats, "ja");
+    expect(r.keptCount).toBe(1);
+    expect(r.followedCount).toBe(DEFAULT_CATEGORIES.length);
+    expect(r.categories[r.categories.length - 1]).toEqual(custom);
+    expect(r.categories[0].name).toBe("睡眠"); // ja 的 sleep 名恰与 zh 同形
+    expect(r.categories[1].name).toBe("勉強");
   });
 
-  it("识别 1.0.3/1.0.4 的双语恢复集（升级前点过恢复的老用户不被误判为自定义）", () => {
+  it("改过名的默认分类保留，其余照常跟随", () => {
+    const cats = defaultCategoriesFor("zh");
+    cats[2] = { ...cats[2], name: "干饭" };
+    const r = followCategoriesToLang(cats, "en");
+    expect(r.keptCount).toBe(1);
+    expect(r.categories[2].name).toBe("干饭");
+    expect(r.categories[1].name).toBe("Study");
+  });
+
+  it("删过的默认分类不复活", () => {
+    const cats = defaultCategoriesFor("zh").slice(1); // 删掉 sleep
+    const r = followCategoriesToLang(cats, "en");
+    expect(r.categories).toHaveLength(DEFAULT_CATEGORIES.length - 1);
+    expect(r.categories.some((c) => c.id === "sleep")).toBe(false);
+  });
+
+  it("已是目标语言形状 → changed=false，不做无谓改写", () => {
+    const r = followCategoriesToLang(defaultCategoriesForRestore("ja"), "ja");
+    expect(r.changed).toBe(false);
+    expect(r.keptCount).toBe(0);
+  });
+
+  it("legacy 1.0.4 双语恢复集 → 全部跟随（升级老用户不被误判）", () => {
     // 测试内独立复刻 1.0.4 旧算法（仅 zh↔en 互桥），防止实现与测试同源出错
     const build104Restore = (lang: "zh" | "en") => {
       const base = defaultCategoriesFor(lang);
@@ -357,9 +398,26 @@ describe("pristineDefaultLang 纯净判定", () => {
       }
       return base;
     };
-    expect(pristineDefaultLang(build104Restore("zh"))).toBe("zh");
-    expect(pristineDefaultLang(build104Restore("en"))).toBe("en");
-    expect(pristineDefaultLang(legacyRestoreCategories("zh"))).toBe("zh");
-    expect(pristineDefaultLang(legacyRestoreCategories("en"))).toBe("en");
+    const r = followCategoriesToLang(build104Restore("zh"), "en");
+    expect(r.keptCount).toBe(0);
+    expect(r.changed).toBe(true);
+    expect(r.categories[0].name).toBe("Sleep");
+  });
+
+  it("重名保护：自定义分类与目标语言默认名撞车时，对应默认条放弃替换", () => {
+    const clash = { id: "cat-2", name: "Sleep", emoji: "🛌", aliases: [] };
+    const cats = [...defaultCategoriesFor("zh"), clash];
+    const r = followCategoriesToLang(cats, "en");
+    expect(r.categories[0].name).toBe("睡眠"); // sleep 条目跳过替换
+    expect(r.categories[1].name).toBe("Study"); // 其余照常
+    expect(r.categories[r.categories.length - 1]).toEqual(clash);
+  });
+
+  it("幂等：连续跟随两次结果一致", () => {
+    const cats = [...defaultCategoriesFor("zh"), custom];
+    const once = followCategoriesToLang(cats, "ko");
+    const twice = followCategoriesToLang(once.categories, "ko");
+    expect(twice.changed).toBe(false);
+    expect(twice.categories).toEqual(once.categories);
   });
 });

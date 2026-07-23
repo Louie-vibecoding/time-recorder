@@ -3,8 +3,8 @@ import TimeRecorderPlugin from "../main";
 import {
   defaultCategoriesForRestore,
   defaultSettingsFor,
+  followCategoriesToLang,
   OTHER_CATEGORY,
-  pristineDefaultLang,
 } from "./settings";
 import { Category, LanguageSetting } from "./types";
 import { generateCategoryId } from "./idgen";
@@ -33,23 +33,23 @@ export class TimeRecorderSettingsTab extends PluginSettingTab {
   /**
    * 切换界面语言。绕开 debounce（避免落盘与整页重画竞争）：
    * 1. 写入偏好并让 override 立即生效（此后所有 t() 用新语言）。
-   * 2. 分类跟随：纯净（= 某语言出厂默认，零数据损失、切回即还原）→ 自动替换为
-   *    目标语言默认（含跨语言关键词桥接）；自定义过 → 一字不动，只显示引导提示。
+   * 2. 分类逐条跟随（followCategoriesToLang）：未修改过的默认分类替换为目标
+   *    语言版（含关键词桥接，可逆零损失）；用户新增/修改过的条目原样保留，
+   *    语言实际变化且存在保留条目时显示一次说明提示。
    * 3. persist（落盘 + 状态栏/已开视图刷新）后整页重画。
    * recordsFolder / templatePath / flashNotePath / 数据层格式在本路径零写入。
    */
   private async applyLanguage(lang: LanguageSetting): Promise<void> {
+    const before = getLang();
     this.plugin.settings.language = lang;
     setLangOverride(lang === "auto" ? null : lang);
     const target = getLang();
-    const pristine = pristineDefaultLang(this.plugin.settings.categories);
-    if (pristine && pristine !== target) {
-      this.plugin.settings.categories = defaultCategoriesForRestore(target);
-      this.showLangCatHint = false;
+    const result = followCategoriesToLang(this.plugin.settings.categories, target);
+    if (result.changed) {
+      this.plugin.settings.categories = result.categories;
       new Notice(format(t("catsFollowedLang"), { lang: LANG_NAMES[target] }));
-    } else if (!pristine) {
-      this.showLangCatHint = true;
     }
+    this.showLangCatHint = before !== target && result.keptCount > 0;
     await this.persist();
     this.display();
   }

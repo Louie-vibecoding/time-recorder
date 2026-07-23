@@ -126,11 +126,11 @@ const zh = {
   // 设置页 SettingsTab
   setLangName: "界面语言",
   setLangDesc:
-    "插件界面文字的语言。「跟随 Obsidian」自动匹配 Obsidian 界面语言。切换语言不会移动或改名任何记录文件，历史记录不受影响。",
+    "插件界面文字的语言。「跟随 Obsidian」自动匹配 Obsidian 界面语言。切换后：界面按钮与文字立即全部切换；没有修改过的默认分类自动换成对应语言；你新增或修改过的分类原样保留；记录文件、文件夹和历史记录永远不受影响。",
   langAuto: "跟随 Obsidian（默认）",
-  catsFollowedLang: "✅ 分类已切换为{lang}默认分类，历史记录不受影响",
+  catsFollowedLang: "✅ 未修改的默认分类已切换为{lang}，历史记录不受影响",
   langCatHint:
-    "界面语言已切换。你自定义过分类，已原样保留。想换成当前语言的默认分类，点下方「恢复默认分类」——旧记录仍会正确归类。",
+    "你新增或修改过的分类已原样保留，不会随语言自动改动。想翻译它们，直接在下方编辑分类名即可。",
   setFolderName: "记录文件夹",
   setFolderDesc: "时间记录 .md 文件所在文件夹。改此项不会自动搬移已有记录文件（旧文件留原处）。",
   setTemplateName: "模板路径",
@@ -226,11 +226,11 @@ const en: typeof zh = {
   deleteFailed: "Delete failed: ",
   setLangName: "Language",
   setLangDesc:
-    "Language of the plugin UI. 'Follow Obsidian' matches Obsidian's interface language. Switching never moves or renames any record files — your history is untouched.",
+    "Language of the plugin UI. 'Follow Obsidian' matches Obsidian's interface language. On switch: all UI text changes immediately; default categories you never modified follow the new language; categories you added or edited are kept as-is; record files, folders and history are never touched.",
   langAuto: "Follow Obsidian (default)",
-  catsFollowedLang: "✅ Categories switched to the {lang} defaults — your records are untouched",
+  catsFollowedLang: "✅ Unmodified default categories switched to {lang} — your records are untouched",
   langCatHint:
-    "Language switched. Your customized categories were kept as-is. To switch them to the current language's defaults, use 'Restore default categories' below — old records will still categorize correctly.",
+    "Categories you added or edited were kept as-is and never switch automatically. To translate them, just edit their names below.",
   setFolderName: "Records folder",
   setFolderDesc: "Folder for time-record .md files. Changing this does not move existing files.",
   setTemplateName: "Template path",
@@ -323,11 +323,11 @@ const ja: typeof zh = {
   deleteFailed: "削除に失敗しました：",
   setLangName: "表示言語",
   setLangDesc:
-    "プラグイン UI の表示言語。「Obsidian に従う」を選ぶと Obsidian の表示言語に自動で合わせます。言語を切り替えても記録ファイルの移動や名前の変更は行われず、これまでの記録に影響はありません。",
+    "プラグイン UI の表示言語。「Obsidian に従う」を選ぶと Obsidian の表示言語に自動で合わせます。切り替え時：UI の文字はすべて即時切り替わります。未変更のデフォルトカテゴリは新しい言語に自動で切り替わり、追加・編集したカテゴリはそのまま保持されます。記録ファイル・フォルダ・過去の記録には一切影響しません。",
   langAuto: "Obsidian に従う（デフォルト）",
-  catsFollowedLang: "✅ カテゴリを{lang}のデフォルトに切り替えました。過去の記録に影響はありません",
+  catsFollowedLang: "✅ 未変更のデフォルトカテゴリを{lang}に切り替えました。過去の記録に影響はありません",
   langCatHint:
-    "表示言語を切り替えました。カスタマイズされたカテゴリはそのまま保持されています。現在の言語のデフォルトカテゴリに切り替えたい場合は、下の「デフォルトに戻す」を使ってください。過去の記録は引き続き正しく分類されます。",
+    "追加・編集したカテゴリはそのまま保持され、言語切り替えでは変更されません。翻訳したい場合は、下でカテゴリ名を直接編集してください。",
   setFolderName: "記録フォルダ",
   setFolderDesc: "時間記録の .md ファイルを保存するフォルダ。変更しても既存の記録ファイルは移動されません（元の場所に残ります）。",
   setTemplateName: "テンプレートパス",
@@ -422,11 +422,11 @@ const ko: typeof zh = {
   deleteFailed: "삭제 실패: ",
   setLangName: "언어",
   setLangDesc:
-    "플러그인 UI 텍스트의 언어입니다. 'Obsidian 따르기'를 선택하면 Obsidian 인터페이스 언어에 자동으로 맞춥니다. 언어를 바꿔도 기록 파일이 이동하거나 이름이 바뀌지 않으며, 과거 기록은 그대로 유지됩니다.",
+    "플러그인 UI 텍스트의 언어입니다. 'Obsidian 따르기'를 선택하면 Obsidian 인터페이스 언어에 자동으로 맞춥니다. 전환 시: UI 텍스트는 모두 즉시 바뀝니다. 수정한 적 없는 기본 분류는 새 언어로 자동 전환되고, 직접 추가하거나 수정한 분류는 그대로 유지됩니다. 기록 파일, 폴더, 과거 기록은 절대 변경되지 않습니다.",
   langAuto: "Obsidian 따르기 (기본값)",
-  catsFollowedLang: "✅ 분류를 {lang} 기본 분류로 전환했습니다. 과거 기록은 그대로 유지됩니다",
+  catsFollowedLang: "✅ 수정하지 않은 기본 분류를 {lang}(으)로 전환했습니다. 과거 기록은 그대로 유지됩니다",
   langCatHint:
-    "언어가 전환되었습니다. 직접 수정한 분류는 그대로 유지됩니다. 현재 언어의 기본 분류로 바꾸려면 아래 '기본 분류 복원'을 사용하세요. 이전 기록도 여전히 올바르게 분류됩니다.",
+    "직접 추가하거나 수정한 분류는 그대로 유지되며, 언어 전환 시 자동으로 바뀌지 않습니다. 번역하려면 아래에서 분류 이름을 직접 수정하세요.",
   setFolderName: "기록 폴더",
   setFolderDesc: "시간 기록 .md 파일을 저장하는 폴더입니다. 이 설정을 바꿔도 기존 기록 파일은 옮겨지지 않습니다 (원래 자리에 그대로 남습니다).",
   setTemplateName: "템플릿 경로",

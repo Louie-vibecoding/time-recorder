@@ -115,19 +115,19 @@ export function defaultCategoriesForRestore(lang: Lang): Category[] {
   return base;
 }
 
-/** 两套分类逐项等价：id/name/emoji 严格（trim），aliases 忽略顺序与大小写。 */
+/** 两个分类条目等价：id/name/emoji 严格（trim），aliases 忽略顺序与大小写。 */
+function sameCategory(a: Category, b: Category): boolean {
+  if (a.id !== b.id || a.name.trim() !== b.name.trim() || a.emoji !== b.emoji) {
+    return false;
+  }
+  const norm = (xs: string[]) => new Set(xs.map((x) => x.trim().toLowerCase()));
+  const sa = norm(a.aliases);
+  const sb = norm(b.aliases);
+  return sa.size === sb.size && [...sa].every((x) => sb.has(x));
+}
+
 function sameCategorySet(a: Category[], b: Category[]): boolean {
-  if (a.length !== b.length) return false;
-  return a.every((ca, i) => {
-    const cb = b[i];
-    if (ca.id !== cb.id || ca.name.trim() !== cb.name.trim() || ca.emoji !== cb.emoji) {
-      return false;
-    }
-    const norm = (xs: string[]) => new Set(xs.map((x) => x.trim().toLowerCase()));
-    const sa = norm(ca.aliases);
-    const sb = norm(cb.aliases);
-    return sa.size === sb.size && [...sa].every((x) => sb.has(x));
-  });
+  return a.length === b.length && a.every((ca, i) => sameCategory(ca, b[i]));
 }
 
 /**
@@ -151,21 +151,61 @@ export function legacyRestoreCategories(lang: "zh" | "en"): Category[] {
 }
 
 /**
- * 纯净判定：当前分类是否就是某语言的出厂默认（含「恢复版」变体——当前四语版
- * 与 1.0.3/1.0.4 的双语版，否则点过恢复按钮的用户会被误判为自定义）。
- * 命中返回该语言，否则 null。
- * 用途：切换界面语言时，纯净分类可安全自动跟随（被替换的只是出厂默认，
- * 切回原语言即恢复原状，零数据损失）；返回 null 则绝不自动改写。
+ * 单条纯净判定：该分类是否就是某语言的出厂形状——原始默认、当前四语恢复版、
+ * 或 1.0.3/1.0.4 的双语恢复版中同 id 的条目。命中 = 用户从未动过这一条。
  */
-export function pristineDefaultLang(cats: Category[]): Lang | null {
+export function isPristineDefaultCategory(cat: Category): boolean {
   for (const lang of ALL_LANGS) {
-    if (sameCategorySet(cats, ALL_DEFAULT_CATEGORIES[lang])) return lang;
-    if (sameCategorySet(cats, defaultCategoriesForRestore(lang))) return lang;
+    const base = ALL_DEFAULT_CATEGORIES[lang].find((c) => c.id === cat.id);
+    if (base && sameCategory(cat, base)) return true;
+    const restored = defaultCategoriesForRestore(lang).find((c) => c.id === cat.id);
+    if (restored && sameCategory(cat, restored)) return true;
   }
   for (const lang of ["zh", "en"] as const) {
-    if (sameCategorySet(cats, legacyRestoreCategories(lang))) return lang;
+    const legacy = legacyRestoreCategories(lang).find((c) => c.id === cat.id);
+    if (legacy && sameCategory(cat, legacy)) return true;
   }
-  return null;
+  return false;
+}
+
+export interface FollowResult {
+  categories: Category[];
+  /** 已跟随目标语言出厂形状的默认分类数（含本就是目标形状的）。 */
+  followedCount: number;
+  /** 用户新增或修改过而原样保留的条目数。 */
+  keptCount: number;
+  /** categories 与输入相比是否有实际变化。 */
+  changed: boolean;
+}
+
+/**
+ * 逐分类语言跟随（纯函数）：切换界面语言时，未被用户动过的默认分类替换为
+ * 目标语言的恢复版（含跨语言关键词桥接，历史记录归类不变）；用户新增、修改
+ * 或删除的痕迹全部尊重——新增条目原位保留、改过的条目一字不动、删掉的不复活。
+ * 重名保护：替换结果若与某个保留条目重名（忽略大小写），该条放弃替换。
+ * 被替换的只是出厂内容，切回原语言即还原，零数据损失。
+ */
+export function followCategoriesToLang(cats: Category[], target: Lang): FollowResult {
+  const targetRestore = defaultCategoriesForRestore(target);
+  const pristineFlags = cats.map((c) => isPristineDefaultCategory(c));
+  const keptNames = new Set(
+    cats.filter((_, i) => !pristineFlags[i]).map((c) => c.name.trim().toLowerCase()),
+  );
+  let followedCount = 0;
+  let keptCount = 0;
+  const categories = cats.map((c, i) => {
+    if (!pristineFlags[i]) {
+      keptCount++;
+      return c;
+    }
+    const twin = targetRestore.find((o) => o.id === c.id);
+    if (!twin || keptNames.has(twin.name.trim().toLowerCase())) {
+      return c;
+    }
+    followedCount++;
+    return { ...twin, aliases: [...twin.aliases] };
+  });
+  return { categories, followedCount, keptCount, changed: !sameCategorySet(categories, cats) };
 }
 
 /**
