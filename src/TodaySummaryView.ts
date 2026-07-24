@@ -195,7 +195,9 @@ export class TodaySummaryView extends ItemView {
   private renderHeatmap(container: HTMLElement, days: DayRecord[], today: string, now: string) {
     const weeks = buildMonthHeatmap(days, today, now);
     if (weeks.length === 0) return;
-    const grid = container.createDiv({ cls: "tr-heatmap" });
+    const wrap = container.createDiv({ cls: "tr-heatmap-wrap" });
+    wrap.createDiv({ cls: "tr-heatmap-title", text: t("heatTitle") });
+    const grid = wrap.createDiv({ cls: "tr-heatmap" });
     for (const ch of [...t("heatWeekdays")]) {
       grid.createDiv({ cls: "tr-heat-weekday", text: ch });
     }

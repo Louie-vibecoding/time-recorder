@@ -379,12 +379,24 @@
 }
 
 /* === Month heatmap（月历热力图，周一起始）=== */
+.tr-heatmap-wrap {
+  /* 与上方汇总表格明确隔开：留白 + 分隔线（与底栏分隔风格一致） */
+  margin-top: var(--size-4-8);
+  padding-top: var(--size-4-3);
+  border-top: 1px solid var(--background-modifier-border);
+}
+
+.tr-heatmap-title {
+  font-size: var(--font-ui-small);
+  color: var(--text-muted);
+  margin-bottom: var(--size-4-2);
+}
+
 .tr-heatmap {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: var(--size-2-2);
-  max-width: 320px;
-  margin-top: var(--size-4-4);
+  max-width: 260px;
 }
 
 .tr-heat-weekday {
