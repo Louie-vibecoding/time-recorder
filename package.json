@@ -1,7 +1,7 @@
 {
   "name": "time-recorder",
   "private": true,
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Time Recorder plugin for Obsidian",
   "main": "main.js",
   "scripts": {

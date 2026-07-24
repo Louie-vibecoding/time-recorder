@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented here. This project follows [Semantic Versioning](https://semver.org/).
 
+## 1.0.6 — 2026-07-24
+
+### Added
+- **Monthly heatmap**: the month summary now shows a calendar heatmap below the stats table — one cell per day (weeks start on Monday), green intensity reflects recorded hours (<2h / 2–6h / 6–12h / 12h+), today is outlined, and tapping a day shows its recorded total. Days follow the record files' local dates; empty auto-created files don't count as recorded.
+
+### Changed
+- **Phone layout**: the punch-in grid now fits on one screen — 3 columns on mainstream phones (the 2-column fallback is reserved for ≤320px screens), cell height adapts to the category count with a 56px floor, and the footer buttons keep clear of the system navigation bar.
+
 ## 1.0.5 — 2026-07-23
 
 ### Added

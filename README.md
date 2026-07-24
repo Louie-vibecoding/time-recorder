@@ -9,6 +9,7 @@ An Obsidian plugin for **two-click time tracking**. Punch in what you're doing r
 - **Two-click punch-in** — open the grid, tap a category (or type a custom activity); the previous segment auto-closes. 两次点击打卡：打开九宫格点一下分类（也可输入自定义活动），上一段自动收尾。
 - **Timeline back-fill** — tap a gap on the 24-hour timeline to add a segment, tap a block to edit or delete; drag edges to resize on desktop. 时间轴补录：在 24 小时时间轴上点空隙补录、点色块编辑或删除，桌面端可拖动边缘调整时长。
 - **Live summaries** — today / week / month breakdown by category with prev/next navigation; copy as a Markdown table. 实时汇总：今日 / 本周 / 本月按分类统计、支持前后翻页，可一键复制为 Markdown 表格。
+- **Monthly heatmap** — a calendar under the month summary: green depth = hours recorded that day, tap a cell for details. 月热力图：月汇总下方的月历视图，绿色深浅代表当天记录时长，点按查看详情。
 - **⚡ Flash note** — jump straight to the end of a chosen note from the punch-in grid, cursor ready to type. 闪记：从打卡面板一键跳到指定笔记末尾，光标就位、直接输入。
 - **Undo & status** — one-tap undo for the latest punch; the status bar (desktop) or ribbon tooltip (Android) shows what's in progress. 撤销与状态：最近一次打卡可一键撤销；状态栏（桌面）/ 功能区提示（安卓）显示进行中的活动。
 - **Your categories, your data** — add / rename / remove categories and keywords in settings, restore defaults anytime. On a language switch, default categories you never modified follow the new language (keyword bridging keeps old records correctly categorized), while categories you added or edited are kept as-is. 分类即数据：在设置里增删改分类与关键词、随时恢复默认。切换界面语言时，未修改过的默认分类自动跟随新语言（关键词桥接让旧记录照常归类），你新增或修改过的分类原样保留。
@@ -36,6 +37,7 @@ An end time of `ing` means the segment is still open. Categories are inferred fr
 
 ## Version history · 版本记录
 
+- **1.0.6** (2026-07-24) — Monthly heatmap under the month summary; the punch-in grid now fits phones on one screen. 新增月热力图；手机端打卡面板一屏显示。
 - **1.0.5** (2026-07-23) — Language setting: the UI now supports Simplified Chinese, English, Japanese and Korean; unmodified default categories follow the language automatically. 新增界面语言设置，现支持简体中文、英语、日语、韩语四种语言；未修改的默认分类自动跟随语言。
 - **1.0.4** (2026-07-22) — ⚡ Flash note: jump to the end of a chosen note from the punch-in grid. 新增闪记：从打卡面板一键跳到指定笔记末尾。
 - **1.0.3** (2026-07-15) — "Restore default categories" bridges languages, so pre-switch records still categorize correctly. 「恢复默认分类」支持跨语言桥接，切换语言前的记录照常归类。
