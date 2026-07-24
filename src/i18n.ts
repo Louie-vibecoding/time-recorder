@@ -177,6 +177,9 @@ const zh = {
   thDur: "时长",
   thPct: "占比",
   unrecordedRow: "⚪ 未记录",
+  heatWeekdays: "一二三四五六日",
+  heatDayDetail: "{date}：已记录 {dur}",
+  heatDayEmpty: "{date}：未记录",
   copied: "已复制到剪贴板 ✅",
   copyFailed: "复制失败：",
 };
@@ -274,6 +277,9 @@ const en: typeof zh = {
   thDur: "Duration",
   thPct: "Share",
   unrecordedRow: "⚪ Unrecorded",
+  heatWeekdays: "MTWTFSS",
+  heatDayDetail: "{date}: {dur} recorded",
+  heatDayEmpty: "{date}: no records",
   copied: "Copied to clipboard ✅",
   copyFailed: "Copy failed: ",
 };
@@ -373,6 +379,9 @@ const ja: typeof zh = {
   thDur: "時間",
   thPct: "割合",
   unrecordedRow: "⚪ 未記録",
+  heatWeekdays: "月火水木金土日",
+  heatDayDetail: "{date}：記録 {dur}",
+  heatDayEmpty: "{date}：未記録",
   copied: "クリップボードにコピーしました ✅",
   copyFailed: "コピーに失敗しました：",
 };
@@ -472,6 +481,9 @@ const ko: typeof zh = {
   thDur: "시간",
   thPct: "비율",
   unrecordedRow: "⚪ 기록 없음",
+  heatWeekdays: "월화수목금토일",
+  heatDayDetail: "{date}: {dur} 기록",
+  heatDayEmpty: "{date}: 기록 없음",
   copied: "클립보드에 복사했습니다 ✅",
   copyFailed: "복사 실패: ",
 };

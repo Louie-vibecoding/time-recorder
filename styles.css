@@ -20,7 +20,9 @@
   gap: var(--size-4-3);
 }
 
-@media (max-width: 360px) {
+/* 2 列仅留给真正的古董窄屏。主流手机 CSS 视口恰为 360px，
+   断点若定在 360 会把它们全部误伤成 2 列（12 格排 6 行、一屏放不下）。 */
+@media (max-width: 320px) {
   .tr-grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -79,6 +81,43 @@
 
 .tr-clickable-notice {
   cursor: pointer;
+}
+
+/* === 手机端：打卡弹窗一屏三段式 ===
+   目标：任何分类数量下都不滚动——网格把状态行/底栏之外的全部高度按行数等分，
+   分类越多格子自动越矮；矮到 56px 保底仍放不下（约 23+ 分类）才出现兜底滚动。
+   桌面/平板浮窗空间充足，维持原布局。 */
+.is-phone .tr-grid-modal .modal-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.is-phone .tr-grid-modal .tr-grid-scroll {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.is-phone .tr-grid-modal .tr-grid {
+  min-height: 100%;
+  grid-auto-rows: minmax(56px, 1fr);
+  gap: var(--size-4-2);
+}
+
+.is-phone .tr-cell {
+  min-height: 56px;
+  padding: var(--size-2-3);
+}
+
+.is-phone .tr-cell-emoji {
+  font-size: 1.5em;
+}
+
+.is-phone .tr-grid-footer {
+  margin-top: var(--size-4-2);
+  /* 避开安卓底部导航条/手势区 */
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 /* === Custom Activity Modal === */
@@ -351,4 +390,45 @@
 /* 切语言后「分类已保留」的引导提示（会话级） */
 .tr-lang-cat-hint {
   color: var(--text-accent);
+}
+
+/* === Month heatmap（月历热力图，周一起始）=== */
+.tr-heatmap {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: var(--size-2-2);
+  max-width: 320px;
+  margin-top: var(--size-4-4);
+}
+
+.tr-heat-weekday {
+  text-align: center;
+  font-size: var(--font-ui-smaller);
+  color: var(--text-faint);
+}
+
+.tr-heat-cell {
+  aspect-ratio: 1 / 1;
+  border-radius: var(--radius-s);
+  background: var(--background-modifier-border);
+  cursor: pointer;
+}
+
+.tr-heat-blank {
+  background: transparent;
+  cursor: default;
+}
+
+.tr-heat-future {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.tr-heat-1 { background: rgba(var(--color-green-rgb), 0.3); }
+.tr-heat-2 { background: rgba(var(--color-green-rgb), 0.55); }
+.tr-heat-3 { background: rgba(var(--color-green-rgb), 0.78); }
+.tr-heat-4 { background: rgb(var(--color-green-rgb)); }
+
+.tr-heat-today {
+  box-shadow: inset 0 0 0 2px var(--interactive-accent);
 }

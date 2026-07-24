@@ -1,5 +1,6 @@
 import { ItemView, WorkspaceLeaf, Notice } from "obsidian";
-import { TimeRecorderSettings } from "./types";
+import { DayRecord, TimeRecorderSettings } from "./types";
+import { buildMonthHeatmap } from "./heatmap";
 import { RecordsFileManager } from "./recordsFile";
 import {
   summarizeDay,
@@ -178,11 +179,50 @@ export class TodaySummaryView extends ItemView {
 
     this.renderTable(container, summary.byCategory, summary.unrecordedMinutes, summary.unrecordedPercent);
 
+    // 月视图：表格下方追加月历热力图（复用本次已读的整月 days，零额外 IO）
+    if (this.period === "month") {
+      this.renderHeatmap(container, days, today, now);
+    }
+
     const footer = container.createDiv({ cls: "tr-summary-footer" });
     const copyBtn = footer.createEl("button", { text: t("copySummary") });
     copyBtn.addEventListener("click", () => {
       void this.copyText(formatPeriodSummaryAsMarkdown(`${label} ${range.start} ~ ${range.end}`, summary, mdStrings()));
     });
+  }
+
+  /** 月历热力图：每天一格，绿色深浅 = 当天记录时长档位；点按弹出当天时长（移动端无 hover）。 */
+  private renderHeatmap(container: HTMLElement, days: DayRecord[], today: string, now: string) {
+    const weeks = buildMonthHeatmap(days, today, now);
+    if (weeks.length === 0) return;
+    const grid = container.createDiv({ cls: "tr-heatmap" });
+    for (const ch of [...t("heatWeekdays")]) {
+      grid.createDiv({ cls: "tr-heat-weekday", text: ch });
+    }
+    for (const week of weeks) {
+      for (const cell of week) {
+        const el = grid.createDiv({ cls: "tr-heat-cell" });
+        if (cell.date === null) {
+          el.addClass("tr-heat-blank");
+          continue;
+        }
+        el.addClass(`tr-heat-${cell.level}`);
+        if (cell.isToday) el.addClass("tr-heat-today");
+        if (cell.isFuture) {
+          el.addClass("tr-heat-future");
+          continue; // 未来日不可点
+        }
+        const date = cell.date;
+        const minutes = cell.minutes;
+        el.addEventListener("click", () => {
+          new Notice(
+            minutes > 0
+              ? format(t("heatDayDetail"), { date, dur: formatDuration(minutes) })
+              : format(t("heatDayEmpty"), { date }),
+          );
+        });
+      }
+    }
   }
 
   private renderTable(
