@@ -34,11 +34,10 @@ export class GridModal extends Modal {
 
     // 分类网格（3 列自动换行）：显示全部分类 + 末尾「自定义…」格。
     // 分类数不再硬限制为 8——加分类直接进 settings.categories，网格自动多排行。
-    // 手机端 tr-grid-scroll 是三段式布局的中间弹性段（网格等分剩余高度，一屏不滚动，
-    // 极端多分类时兜底滚动）；桌面端此包装无样式、布局不变。
-    const gridWrap = contentEl.createDiv({ cls: "tr-grid-scroll" });
-    const grid = gridWrap.createDiv({ cls: "tr-grid" });
+    const grid = contentEl.createDiv({ cls: "tr-grid" });
     const cats = this.settings.categories;
+    // 手机端行高公式需要行数（styles.css 的 --tr-grid-rows）：分类 + 1 个「自定义」格，3 列
+    grid.style.setProperty("--tr-grid-rows", String(Math.ceil((cats.length + 1) / 3)));
 
     for (const cat of cats) {
       this.renderCell(grid, cat, cat.emoji, cat.name, () => void this.handlePunch(cat.name));

@@ -1,10 +1,8 @@
 /* Time Recorder plugin styles */
 
-/* === Grid Modal === */
-.tr-grid-modal .modal-content {
-  padding: var(--size-4-4);
-}
-
+/* === Grid Modal ===
+   注：tr-grid-modal 加在 .modal-content 自身上（GridModal 的 contentEl），
+   写 .tr-grid-modal 后代选择器时不要再嵌 .modal-content。 */
 .tr-grid-header {
   text-align: center;
   font-size: var(--font-ui-medium);
@@ -83,25 +81,13 @@
   cursor: pointer;
 }
 
-/* === 手机端：打卡弹窗一屏三段式 ===
-   目标：任何分类数量下都不滚动——网格把状态行/底栏之外的全部高度按行数等分，
-   分类越多格子自动越矮；矮到 56px 保底仍放不下（约 23+ 分类）才出现兜底滚动。
-   桌面/平板浮窗空间充足，维持原布局。 */
-.is-phone .tr-grid-modal .modal-content {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
-.is-phone .tr-grid-modal .tr-grid-scroll {
-  flex: 1 1 0;
-  min-height: 0;
-  overflow-y: auto;
-}
-
+/* === 手机端：打卡弹窗一屏布局 ===
+   行高上限用视口公式现算：(视口高 − 头尾固定开销约 300px) ÷ 行数（JS 写入 --tr-grid-rows），
+   分类越多格子自动越矮，56px 硬下限兜底。
+   ⚠️ 不要改成依赖 .modal / .modal-content 高度的 flex 链——Obsidian 手机弹窗是
+   内容自适应的 bottom sheet，父级高度不确定，百分比/flex 等分会把格子压成 0 高（1.0.6 真机踩过）。 */
 .is-phone .tr-grid-modal .tr-grid {
-  min-height: 100%;
-  grid-auto-rows: minmax(56px, 1fr);
+  grid-auto-rows: minmax(56px, calc((100dvh - 300px) / var(--tr-grid-rows, 4)));
   gap: var(--size-4-2);
 }
 
